@@ -41,6 +41,50 @@ namespace m0st4fa::forms {
 
 		int width = 0;
 
+		static QString alignmentToString(Alignment alignment) {
+
+			QString algmnt;
+
+			switch (alignment)
+			{
+			case ALIGNMENT_UNSPECIFIED:
+				algmnt = "ALIGNMENT_UNSPECIFIED";
+				break;
+
+			case LEFT:
+				algmnt = "LEFT";
+				break;
+
+			case RIGHT:
+				algmnt = "RIGHT";
+				break;
+
+			case CENTER:
+				algmnt = "CENTER";
+				break;
+
+			default:
+				break;
+			}
+
+			return algmnt;
+		};
+		static Alignment stringToAlignment(QString algmnt) {
+
+			Alignment alignment;
+
+			if (algmnt == "ALIGNMENT_UNSPECIFIED")
+				alignment = ALIGNMENT_UNSPECIFIED;
+			else if (algmnt == "LEFT")
+				alignment = LEFT;
+			else if (algmnt == "RIGHT")
+				alignment = RIGHT;
+			else
+				alignment = CENTER;
+
+			return alignment;
+		};
+
 		QJsonObject toJson() const;
 		static MediaProperties fromJson(const QJsonObject&);
 
@@ -183,7 +227,7 @@ namespace m0st4fa::forms {
 
 	struct ChoiceQuestion {
 
-		enum ChoiceType {
+		enum Type {
 			CHOICE_TYPE_UNSPECIFIED,
 			RADIO,
 			CHECKBOX,
@@ -194,7 +238,7 @@ namespace m0st4fa::forms {
 
 		bool shuffle = false;
 
-		static QString choiceTypeToString(ChoiceType type) {
+		static QString choiceTypeToString(Type type) {
 
 			switch (type)
 			{
@@ -216,7 +260,7 @@ namespace m0st4fa::forms {
 
 			return "CHOICE_TYPE_UNSPECIFIED";
 		}
-		static ChoiceType stringToChoiceType(QString type) {
+		static Type stringToChoiceType(QString type) {
 			
 			if (type == "CHOICE_TYPE_UNSPECIFIED")
 				return CHOICE_TYPE_UNSPECIFIED;
@@ -439,10 +483,10 @@ namespace m0st4fa::forms::update_form {
 	struct Location {
 		unsigned int index = 0;
 
-		QJsonValue toJson() const;
-		static Location fromJson(const QJsonValue& val) {
+		QJsonObject toJson() const;
+		static Location fromJson(const QJsonObject& obj) {
 			return Location{
-				.index = (unsigned)val.toInt()
+				.index = (unsigned)obj.value("index").toInt()
 			};
 		}
 	};

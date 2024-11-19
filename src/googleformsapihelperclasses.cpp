@@ -252,9 +252,11 @@ namespace m0st4fa::forms {
 		};
 	}
 
-	QJsonValue m0st4fa::forms::update_form::Location::toJson() const
+	QJsonObject m0st4fa::forms::update_form::Location::toJson() const
 	{
-		return QJsonValue{ (int)this->index };
+		return QJsonObject{
+			std::pair<QString, QJsonValue>("index", QJsonValue{(int)this->index})
+		};
 	}
 
 	QJsonObject m0st4fa::forms::update_form::CreateItemRequest::toJson() const
@@ -272,7 +274,7 @@ namespace m0st4fa::forms {
 	{
 		return CreateItemRequest{
 			.item = Item::fromJson(json.value("item").toObject()),
-			.location = Location::fromJson(json.value("location").toInt())
+			.location = Location::fromJson(json.value("location").toObject())
 		};
 	}
 
@@ -289,8 +291,8 @@ namespace m0st4fa::forms {
 	update_form::MoveItemRequest update_form::MoveItemRequest::fromJson(const QJsonObject& json)
 	{
 		return MoveItemRequest{
-			.originalLocation = Location::fromJson(json.value("originalLocation").toInt()),
-			.newLocation = Location::fromJson(json.value("newLocation").toInt())
+			.originalLocation = Location::fromJson(json.value("originalLocation").toObject()),
+			.newLocation = Location::fromJson(json.value("newLocation").toObject())
 		};
 	}
 
@@ -306,7 +308,7 @@ namespace m0st4fa::forms {
 	update_form::DeleteItemRequest update_form::DeleteItemRequest::fromJson(const QJsonObject& json)
 	{
 		return DeleteItemRequest{
-			.location = Location::fromJson(json.value("location").toInt())
+			.location = Location::fromJson(json.value("location").toObject())
 		};
 	}
 
@@ -326,7 +328,7 @@ namespace m0st4fa::forms {
 	{
 		return UpdateItemRequest{
 			.item = Item::fromJson(json.value("item").toObject()),
-			.location = Location::fromJson(json.value("location").toInt()),
+			.location = Location::fromJson(json.value("location").toObject()),
 			.updateMask = json.value("updateMask").toString()
 		};
 	}
@@ -442,56 +444,17 @@ namespace m0st4fa::forms {
 
 	QJsonObject MediaProperties::toJson() const
 	{
-
-		QString algmnt;
-
-		switch (alignment)
-		{
-		case ALIGNMENT_UNSPECIFIED:
-			algmnt = "ALIGNMENT_UNSPECIFIED";
-			break;
-
-		case LEFT:
-			algmnt = "LEFT";
-			break;
-
-		case RIGHT:
-			algmnt = "RIGHT";
-			break;
-
-		case CENTER:
-			algmnt = "CENTER";
-			break;
-
-		default:
-			break;
-		}
-
 		return QJsonObject{
-			std::pair<QString, QJsonValue>{"alignment", algmnt},
+			std::pair<QString, QJsonValue>{"alignment", alignmentToString(this->alignment)},
 			std::pair<QString, QJsonValue>{"width", this->width}
 		};
 	}
 
 	MediaProperties MediaProperties::fromJson(const QJsonObject& json)
 	{
-		const QString algmnt = json.value("alignment").toString();
-		Alignment alignment;
-
-		if (algmnt == "ALIGNMENT_UNSPECIFIED")
-			alignment = ALIGNMENT_UNSPECIFIED;
-		else if (algmnt == "LEFT")
-			alignment = LEFT;
-		else if (algmnt == "RIGHT")
-			alignment = RIGHT;
-		else
-			alignment = CENTER;
-
-		int width = json.value("width").toInt();
-
 		return MediaProperties{
-			.alignment = alignment,
-			.width = width
+			.alignment = stringToAlignment(json.value("alignment").toString()),
+			.width = json.value("width").toInt()
 		};
 	}
 
@@ -643,14 +606,21 @@ namespace m0st4fa::forms {
 	{
 		QJsonObject obj = QJsonObject{
 			std::pair<QString, QJsonValue>{"value", this->value},
-			std::pair<QString, QJsonValue>{"image", this->image.toJson()},
 			std::pair<QString, QJsonValue>{"isOther", this->isOther}
 		};
 
+		bool includeImage = !this->image.sourceUri.isEmpty();
+
+		if (includeImage)
+			obj.insert("image", this->image.toJson());
+
 		if (goTo.index() == 0)
-			obj.insert("goToAction", goToActionToString(std::get<0>(goTo)));
+			if (std::get<0>(goTo) == GoToAction::GO_TO_ACTION_UNSPECIFIED);
+			else
+				obj.insert("goToAction", goToActionToString(std::get<0>(goTo)));
 		else
-			obj.insert("goToSectionId", std::get<1>(goTo));
+			if (!std::get<1>(goTo).isEmpty())
+				obj.insert("goToSectionId", std::get<1>(goTo));
 
 		return obj;
 	}
@@ -826,13 +796,25 @@ namespace m0st4fa::forms {
 
 	QJsonObject Grading::toJson() const
 	{
-		return QJsonObject{
+		QJsonObject obj = QJsonObject{
 			std::pair<QString, QJsonValue>{"pointValue", this->pointValue},
-			std::pair<QString, QJsonValue>{"correctAnswers", this->correctAnswers.toJson()},
-			std::pair<QString, QJsonValue>{"whenRight", this->whenRight.toJson()},
-			std::pair<QString, QJsonValue>{"whenWrong", this->whenWrong.toJson()},
-			std::pair<QString, QJsonValue>{"generalFeedback", this->generalFeedback.toJson()}
+			std::pair<QString, QJsonValue>{"correctAnswers", this->correctAnswers.toJson()}
 		};
+
+		bool whenRightIncluded = !this->whenRight.text.isEmpty();
+		bool whenWrongIncluded = !this->whenWrong.text.isEmpty();
+		bool generalFeedbackIncluded = !this->generalFeedback.text.isEmpty();
+
+		if (whenRightIncluded)
+			obj.insert("whenRight", this->whenRight.toJson());
+
+		if (whenWrongIncluded)
+			obj.insert("whenWrong", this->whenWrong.toJson());
+
+		if (generalFeedbackIncluded)
+			obj.insert("generalFeedback", this->generalFeedback.toJson());
+
+		return obj;
 	}
 
 	Grading Grading::fromJson(const QJsonObject& json)
@@ -907,10 +889,18 @@ namespace m0st4fa::forms {
 
 	QJsonObject QuestionItem::toJson() const
 	{
+		bool includeImage = !this->image.sourceUri.isEmpty();
+
+		if (includeImage)
+			return QJsonObject{
+				std::pair<QString, QJsonValue>{"question", this->question.toJson()},
+				std::pair<QString, QJsonValue>{"image", this->image.toJson()}
+			};
+
 		return QJsonObject{
-			std::pair<QString, QJsonValue>{"question", this->question.toJson()},
-			std::pair<QString, QJsonValue>{"image", this->image.toJson()}
+				std::pair<QString, QJsonValue>{"question", this->question.toJson()},
 		};
+
 	}
 
 	QuestionItem QuestionItem::fromJson(const QJsonObject& json)

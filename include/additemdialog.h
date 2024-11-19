@@ -16,6 +16,12 @@ class AddItemDialog : public QDialog
 public:
 	using Form = m0st4fa::forms::Form;
 	using Option = m0st4fa::forms::Option;
+	using Grading = m0st4fa::forms::Grading;
+	using Image = m0st4fa::forms::Image;
+	using Item = m0st4fa::forms::Item;
+	using Question = m0st4fa::forms::Question;
+	using QuestionItem = m0st4fa::forms::QuestionItem;
+	using Item = m0st4fa::forms::Item;
 
 	AddItemDialog(std::shared_ptr<Form>, QWidget *parent = nullptr);
 	~AddItemDialog();
@@ -24,6 +30,14 @@ public:
 	bool isShufflingEnabled() const;
 
 	QVector<Option> getOptions() const;
+
+	Grading getGrading() const;
+
+	Image getImage() const;
+
+	QuestionItem getQuestionItem() const;
+
+	Item getItem() const;
 
 protected slots:
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>447</height>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,9 +21,15 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
+       <widget class="QLineEdit" name="questionTitleLineEdit"/>
+      </item>
+      <item>
        <widget class="QCheckBox" name="questionRequiredCheckbox">
         <property name="text">
          <string>Required</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -31,6 +37,9 @@
        <widget class="QCheckBox" name="shuffleOptionsCheckbox">
         <property name="text">
          <string>Shuffle Options</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

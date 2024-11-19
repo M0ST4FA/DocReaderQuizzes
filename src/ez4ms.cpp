@@ -19,6 +19,11 @@ DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
 
 	this->m_api->setIncludeFormInResponse(true);
 
+	QSettings presets{ DEVELOPMENT_PATH"/presets.ini", QSettings::Format::IniFormat };
+	QString formId = presets.value("formId").toString();
+
+	this->ui->formIdLineEdit->setText(formId);
+
 	connect(this->m_sso, &GoogleSSO::tokenChanged, this, &DocReaderQuizzesApp::tokenChanged);
 	connect(this->m_api, &GoogleFormsAPI::formFetched, [this](std::shared_ptr<Form> form) {
 
@@ -137,19 +142,18 @@ void DocReaderQuizzesApp::on_addMCQBtn_clicked()
 	AddItemDialog* dialog = new AddItemDialog{ this->m_form, this };
 	int result = dialog->exec();
 
-	if (result) {
-		qInfo() << "Required: " << dialog->isQuestionRequired();
-		qInfo() << "Shuffle Options:" << dialog->isShufflingEnabled();
+	using CreateItemRequest = m0st4fa::forms::update_form::CreateItemRequest;
 
-		QJsonArray jsonArray;
-		QVector<AddItemDialog::Option> options = dialog->getOptions();
+	unsigned int index = static_cast<unsigned int>(this->m_form->items.size());
 
-		for (const AddItemDialog::Option& option : options)
-			jsonArray.append(option.toJson());
+	qInfo() << dialog->getImage().toJson();
 
-		qInfo() << "Options:" << jsonArray;
+	CreateItemRequest request {
+		.item = dialog->getItem(),
+		.location = { .index = index }
+	};
 
-	}
+	this->m_api->createItems(this->m_form->formId, {request});
 
 }
 
