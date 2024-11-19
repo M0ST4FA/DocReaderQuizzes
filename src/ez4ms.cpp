@@ -5,6 +5,8 @@
 
 #include <QNetworkReply>
 #include <memory>
+#include "fileparser.h"
+
 
 DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
 	: QWidget(parent)
@@ -155,6 +157,16 @@ void DocReaderQuizzesApp::on_addMCQBtn_clicked()
 
 	this->m_api->createItems(this->m_form->formId, {request});
 
+}
+
+void DocReaderQuizzesApp::on_parseFileBtn_clicked()
+{
+	FileParser parser{ this->m_form, DEVELOPMENT_PATH"/resources/MCQs.txt" };
+	using CreateItemRequest = m0st4fa::forms::update_form::CreateItemRequest;
+
+	QVector<CreateItemRequest> requests = parser.parseFile();
+
+	this->m_api->createItems(this->m_form->formId, requests);
 }
 
 void DocReaderQuizzesApp::tokenChanged()

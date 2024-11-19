@@ -29,6 +29,8 @@ protected slots:
 
     void on_addMCQBtn_clicked();
 
+    void on_parseFileBtn_clicked();
+
     void tokenChanged();
 
 private:

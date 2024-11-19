@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <iostream>
 #include "ez4ms.h"
+#include "fileparser.h"
 
 int main(int argc, char** argv) {
 
@@ -11,6 +12,8 @@ int main(int argc, char** argv) {
 
 	DocReaderQuizzesApp GUI{};
 	GUI.show();
+
+	FileParser parser{ nullptr, DEVELOPMENT_PATH"/resources/MCQs.txt" };
 
 	app.exec();
 }
