@@ -30,6 +30,8 @@ protected slots:
 
 	void on_chooseFileBtn_clicked();
 
+	void on_createQuizBtn_clicked();
+
 private:
 
 	Ui::DocReaderQuizesClass *ui;
@@ -43,10 +45,20 @@ private:
 	std::shared_ptr<m0st4fa::forms::Form> m_form = std::shared_ptr<Form>{ new Form{} };
 
 	struct {
+		QString filePath;
 		QString description;
 		QVector<CreateItemRequest> requests;
 		bool updated = false;
+
+		void reset() {
+			filePath = "";
+			description = "";
+			requests.clear();
+			updated = false;
+		};
 	} m_temporaryInfo;
 
 	FileParser* m_parser = new FileParser{this->m_form};
+
+	void _reset_to_new_quiz_state();
 };

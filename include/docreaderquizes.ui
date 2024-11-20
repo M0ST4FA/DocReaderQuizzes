@@ -17,7 +17,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="authenticationPage">
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -70,6 +70,13 @@
         <widget class="QPushButton" name="chooseFileBtn">
          <property name="text">
           <string>Choose File</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="createQuizBtn">
+         <property name="text">
+          <string>Create Quiz</string>
          </property>
         </widget>
        </item>

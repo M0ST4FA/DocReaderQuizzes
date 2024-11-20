@@ -13,6 +13,8 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	if (this->m_authenticated == false)
 		this->ui->stackedWidget->setCurrentWidget(this->ui->authenticationPage);
 
+	this->_reset_to_new_quiz_state();
+
 	connect(this->m_sso, &GoogleSSO::granted, this, &DocReaderQuizzes::token_granted);
 	connect(this->m_formsApi, &GoogleFormsAPI::formCreated, this, &DocReaderQuizzes::form_created);
 	connect(this->m_formsApi, &GoogleFormsAPI::formUpdated, this, &DocReaderQuizzes::form_updated);
@@ -73,8 +75,19 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 		this->m_formsApi->createItems(this->m_form->formId, m_temporaryInfo.requests);
 	}
 	else { // if we're here, it means that the items have been created
+		
+		for (const UpdateResponse& reply : response.replies) {
+			qInfo() << reply.toJson();
+		}
+
 		this->m_form = response.form;
-		m_temporaryInfo = {}; // reset temporary info
+
+		QString formId = this->m_form->formId;
+		QString formLink = QString{"https://docs.google.com/forms/d/%0"}.arg(formId);
+
+		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nYou can access it via this link: %1." }.arg(formLink));
+
+		this->_reset_to_new_quiz_state();
 	}
 
 }
@@ -86,8 +99,6 @@ void DocReaderQuizzes::on_loginBtn_clicked()
 
 void DocReaderQuizzes::on_chooseFileBtn_clicked()
 {
-	using namespace m0st4fa::forms;
-	using namespace m0st4fa::forms::update_form;
 
 	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{}, "Text Files (*.txt)");
 
@@ -96,7 +107,16 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 		return;
 	}
 
-	this->m_parser->setFilePath(filePath);
+	this->ui->createQuizBtn->setEnabled(true);
+	this->m_temporaryInfo.filePath = filePath;
+}
+
+void DocReaderQuizzes::on_createQuizBtn_clicked()
+{
+	using namespace m0st4fa::forms;
+	using namespace m0st4fa::forms::update_form;
+
+	this->m_parser->setFilePath(m_temporaryInfo.filePath);
 	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
 
 	if (requests.isEmpty()) {
@@ -113,6 +133,20 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 	m_temporaryInfo.updated = false;
 
 	this->m_formsApi->createForm(title, documentTitle);
+	this->ui->createQuizBtn->setText("Creating Quiz...");
+}
+
+void DocReaderQuizzes::_reset_to_new_quiz_state()
+{
+	m_temporaryInfo.reset();
+
+	this->ui->createQuizBtn->setDisabled(true);
+	this->ui->createQuizBtn->setText("Create Quiz");
+	this->m_form = nullptr;
+
+	this->ui->formTitleLineEdit->setText("");
+	this->ui->formDocumentLineEdit->setText("");
+	this->ui->formDescriptionLineEdit->setText("");
 }
 
 void DocReaderQuizzes::token_granted()
