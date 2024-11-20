@@ -2,7 +2,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::DocReaderQuizesClass())

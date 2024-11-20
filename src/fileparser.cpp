@@ -133,11 +133,12 @@ QString FileParser::_parse_question_text()
 		QChar c = this->m_fileContent.at(this->m_index);
 
 		if (c == "\n") {
-			this->m_index++; // skip it
-			if(_is_option_next())
+			if (_is_option_next()) {
+				this->m_index++; // skip it
 				break;
+			}
 			else
-				continue;
+				continue; // it will already be skipped in the next iteration
 		}
 
 		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct())
