@@ -10,6 +10,10 @@ namespace m0st4fa::forms {
 		: QObject(parent)
 		, m_networkManager{ new QNetworkAccessManager{ this } }
 	{
+		this->setIncludeFormInResponse(true);
+
+		qWarning() << "Google Forms API needs an access token. Make sure to set it.";
+
 	}
 
 	GoogleFormsAPI::~GoogleFormsAPI()
@@ -98,6 +102,7 @@ namespace m0st4fa::forms {
 
 		QJsonDocument jsonDoc{ object };
 
+
 		QByteArray json = jsonDoc.toJson();
 
 		// Prepare request
@@ -106,8 +111,7 @@ namespace m0st4fa::forms {
 		// Execute request and get response
 		QJsonDocument response = _execute_request(request, json);
 
-		qInfo() << response;
-
+		emit formCreated(std::shared_ptr<Form>(new Form{ Form::fromJson(response.object()) }));
 	}
 
 	void GoogleFormsAPI::updateForm(const QString& formId, const update_form::UpdateRequestBody& payload)
@@ -211,7 +215,6 @@ namespace m0st4fa::forms {
 	QNetworkRequest GoogleFormsAPI::_prepare_request(const QString& endpoint, int contentLength)
 	{
 		// Configuring the request
-		qInfo() << "Requesting content.";
 		QNetworkRequest request = QNetworkRequest{ QUrl{endpoint} };
 
 		request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -243,19 +246,20 @@ namespace m0st4fa::forms {
 			jsonDoc = QJsonDocument::fromJson(responseData);
 		}
 		else {
-			qDebug() << "Error fetching form:" << reply->errorString();
+			qDebug() << "Error fetching form:" << reply->errorString() << reply->readAll();
 			jsonDoc = QJsonDocument();  // Return an empty document on error
 		}
 
 		networkManager->deleteLater();
 		reply->deleteLater();
 
-		bool error = _check_json_error(jsonDoc);
+		/*bool error = _check_json_error(jsonDoc);
 
 		if (!error)
 			return jsonDoc;
 		else
-			return QJsonDocument{};
+			return QJsonDocument{};*/
+		return jsonDoc;
 	}
 
 	QJsonDocument GoogleFormsAPI::_execute_request(const QNetworkRequest& request, const QByteArray& payload)
@@ -264,8 +268,6 @@ namespace m0st4fa::forms {
 
 		// Creating the reply
 		QNetworkReply* reply = networkManager->post(request, payload);
-
-		qInfo() << "Payload for updating info: " << payload;
 
 		// Blocking the thread until the reply's data is ready
 		QEventLoop eventLoop;
@@ -287,17 +289,17 @@ namespace m0st4fa::forms {
 		networkManager->deleteLater();
 		reply->deleteLater();
 
-		bool error = _check_json_error(jsonDoc);
+		/*bool error = _check_json_error(jsonDoc);
 
 		if (!error)
 			return jsonDoc;
 		else
-			return QJsonDocument{};
+			return QJsonDocument{};*/
+		return jsonDoc;
 	}
 
 	bool GoogleFormsAPI::_check_json_error(const QJsonDocument& json)
 	{
-
 		QJsonObject object = json.object();
 		QStringList keys = object.keys();
 		int errorIndex = keys.indexOf("error");

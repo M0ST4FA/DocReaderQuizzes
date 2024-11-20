@@ -8,18 +8,18 @@
 #include "additemdialog.h"
 #include <memory>
 
-class DocReaderQuizzesApp : public QWidget
+class ez4ms : public QWidget
 {
     Q_OBJECT
 
 public:
-    DocReaderQuizzesApp(QWidget *parent = nullptr);
-    ~DocReaderQuizzesApp();
+    ez4ms(QWidget *parent = nullptr);
+    ~ez4ms();
 
 protected slots:
 
     void on_authenticateBtn_clicked();
-    void on_saveTokensBtn_clicked();
+    void on_removeTokensBtn_clicked();
     void on_requestContentBtn_clicked();
     void on_deleteContentBtn_clicked();
 

@@ -20,8 +20,7 @@ public:
     QString clientSecret() const;
     void setClientSecret(const QString&);
 
-    void saveTokens();
-    void loadTokens();
+    void removeSavedTokens();
 
 public slots:
     void authenticate();
@@ -46,5 +45,9 @@ private:
 
     int m_timeoutTimerId = 0;
     int m_refreshTimerId = 0;
+
+
+    void _save_tokens();
+    void _load_tokens();
 
 };

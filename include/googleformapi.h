@@ -26,7 +26,7 @@ namespace m0st4fa::forms {
 		void setAccessToken(const QString&);
 
 		bool includeFormInResponse() const;
-		void setIncludeFormInResponse(bool);
+		void setIncludeFormInResponse(bool = true);
 
 	public slots:
 		void getForm(const QString&);
@@ -49,7 +49,7 @@ namespace m0st4fa::forms {
 		void responseFetched(const QJsonDocument& response);
 		void responsesFetched(const QJsonDocument& responses);
 
-		void formCreated(const QString& formId);
+		void formCreated(std::shared_ptr<Form> form);
 
 		void formUpdated(const update_form::UpdateResponseBody);
 
@@ -62,7 +62,7 @@ namespace m0st4fa::forms {
 		QString m_accessToken;
 		QNetworkAccessManager* m_networkManager;
 
-		bool m_includeFormInResponse = false;
+		bool m_includeFormInResponse;
 
 		// Functions
 		template<typename T = QJsonDocument>

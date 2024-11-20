@@ -8,7 +8,7 @@
 #include "fileparser.h"
 
 
-DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
+ez4ms::ez4ms(QWidget* parent)
 	: QWidget(parent)
 	, ui(new Ui::ez4ms())
 	, m_sso{ new GoogleSSO{this->m_scope, this} }
@@ -26,7 +26,7 @@ DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
 
 	this->ui->formIdLineEdit->setText(formId);
 
-	connect(this->m_sso, &GoogleSSO::tokenChanged, this, &DocReaderQuizzesApp::tokenChanged);
+	connect(this->m_sso, &GoogleSSO::tokenChanged, this, &ez4ms::tokenChanged);
 	connect(this->m_api, &GoogleFormsAPI::formFetched, [this](std::shared_ptr<Form> form) {
 
 		m_form = form;
@@ -54,9 +54,11 @@ DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
 
 		});
 
-	connect(this->m_api, &GoogleFormsAPI::formCreated, [this](QString formId) {
+	connect(this->m_api, &GoogleFormsAPI::formCreated, [this](std::shared_ptr<Form> form) {
 
-		this->ui->formIdLineEdit->setText(formId);
+		this->ui->formIdLineEdit->setText(form->formId);
+
+		this->ui->receivedContentTextEdit->setText(QJsonDocument{ form->toJson() }.toJson());
 
 		});
 
@@ -76,22 +78,22 @@ DocReaderQuizzesApp::DocReaderQuizzesApp(QWidget* parent)
 		});
 }
 
-DocReaderQuizzesApp::~DocReaderQuizzesApp()
+ez4ms::~ez4ms()
 {
 	delete ui;
 }
 
-void DocReaderQuizzesApp::on_authenticateBtn_clicked()
+void ez4ms::on_authenticateBtn_clicked()
 {
 	m_sso->authenticate();
 }
 
-void DocReaderQuizzesApp::on_saveTokensBtn_clicked()
+void ez4ms::on_removeTokensBtn_clicked()
 {
-	this->m_sso->saveTokens();
+	this->m_sso->removeSavedTokens();
 }
 
-void DocReaderQuizzesApp::on_requestContentBtn_clicked()
+void ez4ms::on_requestContentBtn_clicked()
 {
 	QString formId = this->ui->formIdLineEdit->text();
 	QString responseId = this->ui->responseIdLineEdit->text();
@@ -110,17 +112,17 @@ void DocReaderQuizzesApp::on_requestContentBtn_clicked()
 	return m_api->getResponse(formId, responseId);
 }
 
-void DocReaderQuizzesApp::on_deleteContentBtn_clicked()
+void ez4ms::on_deleteContentBtn_clicked()
 {
 	this->ui->receivedContentTextEdit->clear();
 }
 
-void DocReaderQuizzesApp::on_createFormBtn_clicked()
+void ez4ms::on_createFormBtn_clicked()
 {
 	this->m_api->createForm("Test Form", "Test Form");
 }
 
-void DocReaderQuizzesApp::on_updateFormBtn_clicked()
+void ez4ms::on_updateFormBtn_clicked()
 {
 	UpdateFormDialog dialog{ this->m_form, this };
 	int btn = dialog.exec();
@@ -139,7 +141,7 @@ void DocReaderQuizzesApp::on_updateFormBtn_clicked()
 	this->m_api->updateFormSettings(this->m_form->formId, newSettings);
 }
 
-void DocReaderQuizzesApp::on_addMCQBtn_clicked()
+void ez4ms::on_addMCQBtn_clicked()
 {
 	AddItemDialog* dialog = new AddItemDialog{ this->m_form, this };
 	int result = dialog->exec();
@@ -147,8 +149,6 @@ void DocReaderQuizzesApp::on_addMCQBtn_clicked()
 	using CreateItemRequest = m0st4fa::forms::update_form::CreateItemRequest;
 
 	unsigned int index = static_cast<unsigned int>(this->m_form->items.size());
-
-	qInfo() << dialog->getImage().toJson();
 
 	CreateItemRequest request {
 		.item = dialog->getItem(),
@@ -159,17 +159,20 @@ void DocReaderQuizzesApp::on_addMCQBtn_clicked()
 
 }
 
-void DocReaderQuizzesApp::on_parseFileBtn_clicked()
+void ez4ms::on_parseFileBtn_clicked()
 {
 	FileParser parser{ this->m_form, DEVELOPMENT_PATH"/resources/MCQs.txt" };
 	using CreateItemRequest = m0st4fa::forms::update_form::CreateItemRequest;
 
 	QVector<CreateItemRequest> requests = parser.parseFile();
 
+	for (const CreateItemRequest& request : requests)
+		qInfo() << request.toJson();
+
 	this->m_api->createItems(this->m_form->formId, requests);
 }
 
-void DocReaderQuizzesApp::tokenChanged()
+void ez4ms::tokenChanged()
 {
 	this->m_api->setAccessToken(this->m_sso->token());
 	this->ui->accessTokenLineEdit->setText(this->m_sso->token());

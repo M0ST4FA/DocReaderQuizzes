@@ -94,9 +94,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="saveTokensBtn">
+      <widget class="QPushButton" name="removeTokensBtn">
        <property name="text">
-        <string>Save Tokens</string>
+        <string>Remove Tokens</string>
        </property>
       </widget>
      </item>

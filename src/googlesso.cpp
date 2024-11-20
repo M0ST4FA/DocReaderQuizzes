@@ -4,6 +4,7 @@
 #include <QTimer>
 
 #include <QSettings>
+#include <QMultiMap>
 
 GoogleSSO::GoogleSSO(const QString& scope, QObject* parent)
     : QOAuth2AuthorizationCodeFlow(parent)
@@ -18,9 +19,6 @@ GoogleSSO::GoogleSSO(const QString& scope, QObject* parent)
     QString clientId = settings.value("clientId").toString();
     QString clientSecret = settings.value("clientSecret").toString();
 
-    qInfo() << clientId;
-    qInfo() << clientSecret;
-
     // Configuring the authorization flow
     this->setClientIdentifier(clientId);
     this->setClientIdentifierSharedKey(clientSecret);
@@ -30,7 +28,7 @@ GoogleSSO::GoogleSSO(const QString& scope, QObject* parent)
     this->setPkceMethod(QOAuth2AuthorizationCodeFlow::PkceMethod::S256);
     this->setReplyHandler(m_replyHandler);
 
-    this->loadTokens();
+    this->_load_tokens();
 
     // Connecting signals to slots
     connect(this, &QAbstractOAuth::authorizeWithBrowser, this, [this](const QUrl& url) {
@@ -59,12 +57,40 @@ GoogleSSO::GoogleSSO(const QString& scope, QObject* parent)
         this, &GoogleSSO::onStatusChanged);
 
     connect(this, &QAbstractOAuth::requestFailed, this, &GoogleSSO::onRequestFailed);
+    connect(this->m_replyHandler, &QOAuthHttpServerReplyHandler::tokenRequestErrorOccurred, [](QAbstractOAuth::Error error, const QString& errorStr) {
 
-    // Setup the token refresher timer. Refresh access token each hour
+        switch (error)
+        {
+        case QAbstractOAuth::Error::NoError:
+            qInfo() << "No error.";
+            break;
+        case QAbstractOAuth::Error::NetworkError:
+            qInfo() << "Callback error.";
+            break;
+        case QAbstractOAuth::Error::ServerError:
+            qInfo() << "Server error.";
+            break;
+        case QAbstractOAuth::Error::OAuthTokenNotFoundError:
+            qInfo() << "Authorization token not found.";
+            break;
+        case QAbstractOAuth::Error::OAuthTokenSecretNotFoundError:
+            qInfo() << "Authorization secret not found.";
+            break;
+        case QAbstractOAuth::Error::OAuthCallbackNotVerified:
+            qInfo() << "Authorization callback not verified.";
+            break;
+        default:
+            break;
+        }
+
+        qInfo() << errorStr;
+
+        });
+
 }
 GoogleSSO::~GoogleSSO()
 {
-    this->saveTokens();
+    this->_save_tokens();
 }
 
 const QUrl GoogleSSO::AUTHORIZATION_CODE_URI = QUrl{ "https://accounts.google.com/o/oauth2/auth" };
@@ -90,7 +116,19 @@ void GoogleSSO::setClientSecret(const QString& clientSecret)
     this->setClientIdentifierSharedKey(clientSecret);
 }
 
-void GoogleSSO::saveTokens()
+void GoogleSSO::removeSavedTokens()
+{
+    QSettings settings;
+
+    settings.beginGroup("tokens");
+
+    settings.remove("access_token");
+    settings.remove("refresh_token");
+
+    settings.endGroup();
+}
+
+void GoogleSSO::_save_tokens()
 {
     QSettings settings;
 
@@ -103,7 +141,7 @@ void GoogleSSO::saveTokens()
 
 }
 
-void GoogleSSO::loadTokens()
+void GoogleSSO::_load_tokens()
 {
     QSettings settings;
 
@@ -158,7 +196,7 @@ void GoogleSSO::onStatusChanged(QAbstractOAuth::Status status)
 
     QDebug info = qInfo().nospace().noquote();
 
-    info << "Status of the authentication process changed. Current status: ";
+    info << "[Status of the authentication process changed] Current status: ";
     
     switch (status)
     {
