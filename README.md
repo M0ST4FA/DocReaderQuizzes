@@ -65,7 +65,7 @@ Notice how  the first question spans multiple lines. Also notice that you can in
 
 ### Roadmap
 
-- [X] Support additional quiz specifications (e.g., TOML and YAML)
+- [ ] Support additional quiz specifications (e.g., TOML and YAML)
 - [ ] Support generating quizzes from pdf directly (you can do it now with copy-and-paste, assuming correct format)
 - [ ] Support generating quizzes from image directly (you can do it now with copy-and-paste and the help of Google lens, assuming correct format)
 

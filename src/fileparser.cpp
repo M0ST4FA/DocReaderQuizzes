@@ -256,6 +256,9 @@ bool FileParser::_is_option_indicator_next(qsizetype startIndex)
 			break;
 		}
 
+		if (c == "*")
+			break; // Only an option could possibly have *
+		
 		if (c.isLetter())
 			continue;
 		else {
@@ -331,6 +334,7 @@ QJsonDocument FileParser::_parse_file()
 			break;
 
 		questions.append(question);
+		qInfo() << question;
 	}
 
 	return QJsonDocument{ questions };

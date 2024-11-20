@@ -102,6 +102,8 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 
 	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{}, "Text Files (*.txt)");
 
+	qInfo() << filePath;
+	
 	if (filePath.isEmpty()) {
 		QMessageBox::critical(this, "Error while processing chosen file.", "Either you didn't choose a file or the path is incorrect. Try to choose again.");
 		return;
