@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
 	app.setOrganizationName("DocReader");
 	app.setApplicationName("Quizzes");
 
-	QIcon appIcon{ "./assets/icons/appicon.ico" };
+	QIcon appIcon{ "./assets/icons/appicon.svg" };
 
 	if (appIcon.isNull())
 		qInfo() << "App icon didn't load.";

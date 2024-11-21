@@ -14,14 +14,15 @@ GoogleSSO::GoogleSSO(const QString& scope, QObject* parent)
     // Namespaces
     using namespace std::chrono_literals;
 
-    QSettings settings{ DEVELOPMENT_PATH"/secret.ini", QSettings::Format::IniFormat };
+    if constexpr (std::string(CLIENT_ID).empty())
+        qFatal("You must define CLIENT_ID compiler definition.");
 
-    QString clientId = settings.value("clientId").toString();
-    QString clientSecret = settings.value("clientSecret").toString();
+    if constexpr (std::string(CLIENT_SECRET).empty())
+        qFatal("You must define CLIENT_SECRET compiler definition.");
 
     // Configuring the authorization flow
-    this->setClientIdentifier(clientId);
-    this->setClientIdentifierSharedKey(clientSecret);
+    this->setClientIdentifier(CLIENT_ID); // CLIENT_ID defined in the CMakeUserPresets.json
+    this->setClientIdentifierSharedKey(CLIENT_SECRET); // CLIENT_SECRET defined in the CMakeUserPresets.json
     this->setScope(scope);
     this->setAuthorizationUrl(AUTHORIZATION_CODE_URI);
     this->setAccessTokenUrl(ACCESS_TOKEN_URI);

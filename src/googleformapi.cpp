@@ -6,6 +6,7 @@
 #include <QJsonValue>
 
 namespace m0st4fa::forms {
+
 	GoogleFormsAPI::GoogleFormsAPI(QObject* parent)
 		: QObject(parent)
 		, m_networkManager{ new QNetworkAccessManager{ this } }

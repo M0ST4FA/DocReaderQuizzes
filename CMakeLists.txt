@@ -32,10 +32,12 @@ file(GLOB PROJECT_SOURCES "main.cpp" "include/*.h" "include/*.ui" "src/*.cpp")
 qt_add_executable(Quizzes ${PROJECT_SOURCES} ${WIN32_RESOURCES})
 target_include_directories(Quizzes PRIVATE "include")
 
-# set_target_properties(Quizzes
-#     PROPERTIES
-#         WIN32_EXECUTABLE TRUE
-# )
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set_target_properties(Quizzes
+        PROPERTIES
+            WIN32_EXECUTABLE TRUE
+    )
+endif()
 
 target_link_libraries(Quizzes
     PRIVATE
@@ -48,6 +50,8 @@ target_link_libraries(Quizzes
 )
 
 target_compile_definitions(Quizzes PRIVATE DEVELOPMENT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(Quizzes PRIVATE CLIENT_ID="${CLIENT_ID}")
+target_compile_definitions(Quizzes PRIVATE CLIENT_SECRET="${CLIENT_SECRET}")
 
 # Create a new assets directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
@@ -55,6 +59,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets/icons)
 
 # Copy specific files from assets/icons to the new assets directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/appicon.ico DESTINATION ${CMAKE_BINARY_DIR}/assets/icons)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/appicon.svg DESTINATION ${CMAKE_BINARY_DIR}/assets/icons)
 
 install(TARGETS Quizzes DESTINATION bin)
 install(DIRECTORY ${CMAKE_BINARY_DIR}/assets DESTINATION assets)

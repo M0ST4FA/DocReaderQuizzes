@@ -38,7 +38,7 @@ private:
 
 	bool m_authenticated = false;
 
-	QString scope{ "https://www.googleapis.com/auth/forms.body https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file" };
+	QString scope{ "https://www.googleapis.com/auth/forms.body https://www.googleapis.com/auth/drive.file" };
 	GoogleSSO* m_sso = new GoogleSSO{ scope, this };
 
 	m0st4fa::forms::GoogleFormsAPI* m_formsApi = new GoogleFormsAPI{this};
@@ -61,4 +61,5 @@ private:
 	FileParser* m_parser = new FileParser{this->m_form};
 
 	void _reset_to_new_quiz_state();
+	void _set_copyright_info();
 };

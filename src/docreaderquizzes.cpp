@@ -7,6 +7,7 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	, ui(new Ui::DocReaderQuizzesClass())
 {
 	ui->setupUi(this);
+	this->_set_copyright_info();
 
 	this->m_formsApi->setIncludeFormInResponse(true);
 
@@ -152,6 +153,14 @@ void DocReaderQuizzes::_reset_to_new_quiz_state()
 	this->ui->formTitleLineEdit->setText("");
 	this->ui->formDocumentLineEdit->setText("");
 	this->ui->formDescriptionLineEdit->setText("");
+}
+
+void DocReaderQuizzes::_set_copyright_info()
+{
+	QWidget* authenticationPage = this->ui->authenticationPage;
+	QGridLayout* authPageLayout = dynamic_cast<QGridLayout*>(authenticationPage->layout());
+	this->ui->logoLabel->setPixmap(QPixmap{ "assets/icons/appicon.svg" }.scaled(QSize{ 100, 100 }));
+
 }
 
 void DocReaderQuizzes::token_granted()
