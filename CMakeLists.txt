@@ -25,6 +25,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.rc PROPERTIES LANGUAGE RC)
 endif()
 
+# MAIN APP
 file(GLOB PROJECT_SOURCES "main.cpp" "include/*.h" "include/*.ui" "src/*.cpp")
 # QT_ADD_RESOURCES(PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.qrc")
 
@@ -54,3 +55,6 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets/icons)
 
 # Copy specific files from assets/icons to the new assets directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/appicon.ico DESTINATION ${CMAKE_BINARY_DIR}/assets/icons)
+
+install(TARGETS Quizzes DESTINATION bin)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/assets DESTINATION assets)
