@@ -63,4 +63,6 @@ private:
 	 */
 	qsizetype _next_non_white_space_at(qsizetype);
 
+	void _reset_parser();
+
 };

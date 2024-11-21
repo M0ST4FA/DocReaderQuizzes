@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DocReaderQuizesClass</class>
- <widget class="QWidget" name="DocReaderQuizesClass">
+ <class>DocReaderQuizzesClass</class>
+ <widget class="QWidget" name="DocReaderQuizzesClass">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>DocReaderQuizes</string>
+   <string>DocReaderQuizzes</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

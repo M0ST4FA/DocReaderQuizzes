@@ -1,10 +1,10 @@
-#include "docreaderquizes.h"
+#include "docreaderquizzes.h"
 #include <QFileDialog>
 #include <QMessageBox>
 
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
-	, ui(new Ui::DocReaderQuizesClass())
+	, ui(new Ui::DocReaderQuizzesClass())
 {
 	ui->setupUi(this);
 
@@ -119,6 +119,9 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	using namespace m0st4fa::forms::update_form;
 
 	this->m_parser->setFilePath(m_temporaryInfo.filePath);
+	this->ui->createQuizBtn->setDisabled(true);
+	this->ui->createQuizBtn->setText("Parsing File...");
+
 	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
 
 	if (requests.isEmpty()) {
@@ -134,8 +137,8 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	m_temporaryInfo.requests = requests;
 	m_temporaryInfo.updated = false;
 
-	this->m_formsApi->createForm(title, documentTitle);
 	this->ui->createQuizBtn->setText("Creating Quiz...");
+	this->m_formsApi->createForm(title, documentTitle);
 }
 
 void DocReaderQuizzes::_reset_to_new_quiz_state()

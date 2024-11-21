@@ -86,6 +86,7 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 
 void FileParser::setFilePath(const QString& path)
 {
+	this->_reset_parser();
 	_open_and_read_file(path);
 }
 
@@ -299,6 +300,15 @@ qsizetype FileParser::_next_non_white_space_at(qsizetype startIndex)
 
 	// This is in case we're at the end of the file
 	return startIndex;
+}
+
+void FileParser::_reset_parser()
+{
+	this->m_form.reset();
+	this->m_file.close();
+	this->m_index = 0;
+	this->m_fileContent.clear();
+	this->m_document = QJsonDocument{};
 }
 
 void FileParser::_open_and_read_file(const QString& path)

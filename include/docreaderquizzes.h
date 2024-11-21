@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "ui_docreaderquizes.h"
+#include "ui_docreaderquizzes.h"
 #include "googlesso.h"
 #include "googleformapi.h"
 #include "fileparser.h"
@@ -34,7 +34,7 @@ protected slots:
 
 private:
 
-	Ui::DocReaderQuizesClass *ui;
+	Ui::DocReaderQuizzesClass *ui;
 
 	bool m_authenticated = false;
 
