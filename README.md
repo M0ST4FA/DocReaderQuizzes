@@ -8,6 +8,7 @@ A simple application that converts a text file into a Google Forms quiz.
 - [Usage](#usage)
 - [Roadmap](#roadmap)
 - [License](#license)
+- [Third-party Libraries](#third-party-libraries)
 
 ## About The Project
 
@@ -19,7 +20,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Dependencies
 
-- Qt 6.8.x
+- Qt 6.8.x (dynamically-linked)
 
 ### Installation
 
@@ -71,4 +72,12 @@ Notice how  the first question spans multiple lines. Also notice that you can in
 
 ### License
 
-See ```LICENSE``` for more information.
+See [LICENSE](LICENSE) for more information.
+
+### Third-party Libraries
+
+This application uses the following third-party libraries:
+
+- **Qt Libraries**: Licensed under the GNU Lesser General Public License (LGPL).
+  - Source code available at: https://github.com/qt/qtbase
+  - Full text of LGPL license: https://www.gnu.org/licenses/lgpl-3.0.txt
