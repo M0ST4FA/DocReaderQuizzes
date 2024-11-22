@@ -6,6 +6,7 @@ A simple application that converts a text file into a Google Forms quiz.
 - [About The Project](#about-the-project)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
+- [Text File Specification/Format](#text-file-specification)
 - [Roadmap](#roadmap)
 - [License](#license)
 - [Third-party Libraries](#third-party-libraries)
@@ -24,30 +25,53 @@ To get a local copy up and running follow these simple steps.
 
 ### Installation
 
-Right now, the only way is to clone the repo and build the application from source, but other installation methods are coming soon.
+#### For Developers
+You can fork the repo or you can clone it. Then you can build it locally and modify it as you like.
+
+#### For end users
+Install the built app from the [releases page](https://github.com/M0ST4FA/DocReaderQuizzes/releases). 
+
+> [!NOTE]
+> Choose the latest version, since it will have the latest fixes and features. 
+
+> [!IMPORTANT]
+> Be sure to choose the build that matches your OS. Otherwise, the app will not work on your machine.
 
 ## Usage
 
-1. Open DocReaderQuizzes.exe
-2. When you open it for the first time, it will ask you to authenticate with your Google account. It saves the refresh token (e.g., in the Windows registry in case of Windows) so that you don't have to authenticate every time you open the app. After you authenticate, the main page will open.
-3. In this page, you have to enter the title of the form, the name of the document in GDrive, and a description of the form. You then choose a file from which the form will be generated.
+1. Open Quizzes.exe
+2. When you open it for the first time, you will be directed to the authentication page. 
+![Authentication page](assets/images/login-page.png "Login page")
+  - Press ```Login with Google``` button. This will direct you to the familiar Google authentication page.
+  - Your credentials will be saved locally (we don't save any sensitive information on any server, only on your computer for convenience purposes) so that you don't have to re-authenticate the next times you open the app.
+3. After you authenticate, you will be directed to the main page.
+![Main page](assets/images/application-page.png "Main page")
+  - In this page:
+    1. Enter the title of the form.
+    2. Enter the title of the document in your Google Drive.
+    3. Enter a description of the form.
+    4. Click ```Choose File```. This will open up a file dialog. Choose the file from which the form will be generated.
+    5. Click ```Create Form```. The form will be created in your Google Drive and the name of the document will be the name you entered in the ```Document Title``` field above.
 
-### Text File Specification
+## Text File Specification
 
-- Questions consist of:
+#### Format
+- The text file consists of a list of questions.
+
+- Each question consists of:
   1. Question title
   2. Options
 
-- Question titles consist of:
+- Each question title consist of:
   1. Question indicator, which is a numeral followed by "."
   2. Question text, which can span multiple lines.
 
 - Each option consists of:
   1. (optional) Correct answer indicator, which is "*", and indicates a correct answer. There must be one, and only one correct answer. Otherwise, behavior is undefined. This behavior is not enforced by the parser.
   2. Option indicator, which is a sequence of one or more letters followed by "."
-  3. Option text, which cannot span multiple lines
+  3. Option text, which **cannot** span multiple lines.
 
-### Example of Text File Specification
+#### Example of Text File
 
 ``` text
 1. What is the outer layer 
@@ -64,17 +88,17 @@ of the heart?
 ```
 Notice how  the first question spans multiple lines. Also notice that you can indent options for ease of reading. The correct answer is indicated by "*" preceding the option indicator.
 
-### Roadmap
+## Roadmap
 
 - [ ] Support additional quiz specifications (e.g., TOML and YAML)
 - [ ] Support generating quizzes from pdf directly (you can do it now with copy-and-paste, assuming correct format)
 - [ ] Support generating quizzes from image directly (you can do it now with copy-and-paste and the help of Google lens, assuming correct format)
 
-### License
+## License
 
 See [LICENSE](LICENSE) for more information.
 
-### Third-party Libraries
+## Third-party Libraries
 
 This application uses the following third-party libraries:
 
