@@ -11,7 +11,7 @@ class GoogleSSO : public QOAuth2AuthorizationCodeFlow {
     Q_OBJECT
 
 public:
-    GoogleSSO(const QString&, QObject* = nullptr);
+    GoogleSSO(const QString&, QObject*);
     virtual ~GoogleSSO();
 
     QString clientId() const;
@@ -38,16 +38,22 @@ private:
     static const QUrl ACCESS_TOKEN_URI;
 
     // Main objects used for networking
-    QOAuthHttpServerReplyHandler* m_replyHandler;
+    QOAuthHttpServerReplyHandler* m_replyHandler{ new QOAuthHttpServerReplyHandler{m_callbackPort, this} };
     quint16 m_callbackPort = 8080;
 
+    // Timers
     std::chrono::milliseconds m_tokenExpiryTime;
-
     int m_timeoutTimerId = 0;
     int m_refreshTimerId = 0;
 
-
+    // Storing tokens
     void _save_tokens();
     void _load_tokens();
+
+    // Setup sso configuration
+    inline void _configure_sso(const QString&);
+
+    // Setup signals and slots
+    inline void _configure_signals_and_slots();
 
 };

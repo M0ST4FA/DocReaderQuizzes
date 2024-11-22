@@ -6,7 +6,7 @@
 #include <QFile>
 
 
-FileParser::FileParser(std::shared_ptr<Form> form, const QString& path) : m_form{ form }
+FileParser::FileParser(const QString& path)
 {
 
 	if (!path.isEmpty())
@@ -90,9 +90,113 @@ void FileParser::setFilePath(const QString& path)
 	_open_and_read_file(path);
 }
 
-void FileParser::setForm(std::shared_ptr<Form> form)
+void FileParser::_open_and_read_file(const QString& path)
 {
-	this->m_form = form;
+	this->m_file.setFileName(path);
+
+	bool opened = m_file.open(QIODeviceBase::OpenModeFlag::ReadOnly | QIODeviceBase::OpenModeFlag::Text | QIODeviceBase::OpenModeFlag::ExistingOnly);
+
+	if (!opened) {
+
+		qCritical() << "Couldn't open file.";
+		qCritical() << m_file.errorString();
+
+	}
+
+	this->m_file.waitForReadyRead(-1);
+
+	this->m_fileContent = this->m_file.readAll();
+}
+
+QJsonDocument FileParser::_parse_file()
+{
+	// The file is made from a bunch of questions
+
+	QJsonArray questions;
+
+	// Continue until an empty object is returned
+	while (true) {
+
+		QJsonObject question = _parse_question();
+
+		if (question.isEmpty())
+			break;
+
+		questions.append(question);
+		qInfo() << question;
+	}
+
+	return QJsonDocument{ questions };
+}
+
+// Parsing questions
+QJsonObject FileParser::_parse_question()
+{
+
+	// A question is made of a title and a bunch of answers
+	QJsonObject title = _parse_question_title();
+
+	if (title.isEmpty())
+		return QJsonObject{};
+
+	QJsonArray options;
+
+	while (true) {
+
+		QJsonObject option = _parse_question_option();
+
+		if (option.isEmpty())
+			break;
+
+		options.append(option);
+	}
+
+	return QJsonObject{
+		std::pair<QString, QJsonValue>{"title", title},
+		std::pair<QString, QJsonValue>{"options", options}
+	};
+}
+
+QJsonObject FileParser::_parse_question_title()
+{
+	// Question title is a string that:
+	// 1. begins with a number or nothing
+	// 2. continues until a new line character
+
+	QString questionIndicator = _parse_question_indicator();
+
+	if (questionIndicator.isEmpty())
+		return QJsonObject{};
+
+	QString questionText = _parse_question_text();
+
+	// If there's a question
+	return QJsonObject{
+		std::pair<QString, QJsonValue>{"indicator", questionIndicator},
+		std::pair<QString, QJsonValue>{"text", questionText}
+	};
+}
+
+QJsonObject FileParser::_parse_question_option()
+{
+
+	// Question option has:
+	// 1. indicator
+	// 2. text
+
+	bool isCorrectAnswer = _check_correct_answer();
+	QString optionIndicator = _parse_option_indicator();
+
+	if (optionIndicator.isEmpty())
+		return QJsonObject{};
+
+	QString optionText = _parse_option_text();
+
+	return QJsonObject{
+		std::pair<QString, QJsonValue>{"isCorrectAnswer", isCorrectAnswer},
+		std::pair<QString, QJsonValue>{"indicator", optionIndicator},
+		std::pair<QString, QJsonValue>{"text", optionText}
+	};
 }
 
 QString FileParser::_parse_question_indicator()
@@ -170,6 +274,7 @@ bool FileParser::_check_correct_answer()
 	return false;
 }
 
+// Parsing question options
 QString FileParser::_parse_option_indicator()
 {
 	QString indicator;
@@ -222,6 +327,7 @@ QString FileParser::_parse_option_text()
 	return text;
 }
 
+// Lookahead functions
 bool FileParser::_is_option_next()
 {
 	
@@ -272,20 +378,6 @@ bool FileParser::_is_option_indicator_next(qsizetype startIndex)
 	return foundOption;
 }
 
-void FileParser::_clear_white_spaces()
-{
-	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
-
-		QChar c = this->m_fileContent.at(this->m_index);
-
-		if (c.isSpace())
-			continue;
-
-		return;
-	}
-
-}
-
 qsizetype FileParser::_next_non_white_space_at(qsizetype startIndex)
 {
 	for (qsizetype i = startIndex; i < this->m_fileContent.size(); i++) {
@@ -302,119 +394,29 @@ qsizetype FileParser::_next_non_white_space_at(qsizetype startIndex)
 	return startIndex;
 }
 
+// Dealing with whitespace
+void FileParser::_clear_white_spaces()
+{
+	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
+
+		QChar c = this->m_fileContent.at(this->m_index);
+
+		if (c.isSpace())
+			continue;
+
+		return;
+	}
+
+}
+
+// Reseting parser state
 void FileParser::_reset_parser()
 {
-	this->m_form.reset();
+	// Reset file state
 	this->m_file.close();
 	this->m_index = 0;
 	this->m_fileContent.clear();
+
+	// Reset document
 	this->m_document = QJsonDocument{};
-}
-
-void FileParser::_open_and_read_file(const QString& path)
-{
-	this->m_file.setFileName(path);
-
-	bool opened = m_file.open(QIODeviceBase::OpenModeFlag::ReadOnly | QIODeviceBase::OpenModeFlag::Text | QIODeviceBase::OpenModeFlag::ExistingOnly);
-
-	if (!opened) {
-
-		qCritical() << "Couldn't open file.";
-		qCritical() << m_file.errorString();
-
-	}
-
-	this->m_file.waitForReadyRead(-1);
-
-	this->m_fileContent = this->m_file.readAll();
-}
-
-QJsonDocument FileParser::_parse_file()
-{
-	// The file is made from a bunch of questions
-
-	QJsonArray questions;
-
-	// Continue until an empty object is returned
-	while (true) {
-
-		QJsonObject question = _parse_question();
-
-		if (question.isEmpty())
-			break;
-
-		questions.append(question);
-		qInfo() << question;
-	}
-
-	return QJsonDocument{ questions };
-}
-
-QJsonObject FileParser::_parse_question()
-{
-
-	// A question is made of a title and a bunch of answers
-	QJsonObject title = _parse_question_title();
-
-	if (title.isEmpty())
-		return QJsonObject{};
-
-	QJsonArray options;
-
-	while (true) {
-
-		QJsonObject option = _parse_question_option();
-
-		if (option.isEmpty())
-			break;
-
-		options.append(option);
-	}
-
-	return QJsonObject{
-		std::pair<QString, QJsonValue>{"title", title},
-		std::pair<QString, QJsonValue>{"options", options}
-	};
-}
-
-QJsonObject FileParser::_parse_question_title()
-{
-	// Question title is a string that:
-	// 1. begins with a number or nothing
-	// 2. continues until a new line character
-
-	QString questionIndicator = _parse_question_indicator();
-
-	if (questionIndicator.isEmpty())
-		return QJsonObject{};
-
-	QString questionText = _parse_question_text();
-
-	// If there's a question
-	return QJsonObject{
-		std::pair<QString, QJsonValue>{"indicator", questionIndicator},
-		std::pair<QString, QJsonValue>{"text", questionText}
-	};
-}
-
-QJsonObject FileParser::_parse_question_option()
-{
-
-	// Question option has:
-	// 1. indicator
-	// 2. text
-
-	bool isCorrectAnswer = _check_correct_answer();
-	QString optionIndicator = _parse_option_indicator();
-
-	if (optionIndicator.isEmpty())
-		return QJsonObject{};
-
-	QString optionText = _parse_option_text();
-
-	return QJsonObject{
-		std::pair<QString, QJsonValue>{"isCorrectAnswer", isCorrectAnswer},
-		std::pair<QString, QJsonValue>{"indicator", optionIndicator},
-		std::pair<QString, QJsonValue>{"text", optionText}
-	};
 }

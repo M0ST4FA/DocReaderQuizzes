@@ -60,17 +60,20 @@ namespace m0st4fa::forms {
 		static const QString ENDPOINT_BASE;
 
 		QString m_accessToken;
-		QNetworkAccessManager* m_networkManager;
 
-		bool m_includeFormInResponse;
+		bool m_includeFormInResponse = true;
 
-		// Functions
+		// FUNCTIONS
 		template<typename T = QJsonDocument>
 		void _handle_get_future(GET_TYPE, const QFuture<T>& future, const QString&);
+
+		// Dealing with requests
 		QNetworkRequest _prepare_request(const QString&, int = 0);
 		QJsonDocument _execute_request(const QNetworkRequest&);
 		QJsonDocument _execute_request(const QNetworkRequest&, const QByteArray&);
 		bool _check_json_error(const QJsonDocument&);
+
+		// Dealing with forms
 		std::shared_ptr<Form> _fetch_form(const QString&);
 		QJsonDocument _fetch_response(const QString&, const QString&);
 		QJsonDocument _fetch_responses(const QString&);

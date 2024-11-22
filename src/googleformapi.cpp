@@ -9,9 +9,7 @@ namespace m0st4fa::forms {
 
 	GoogleFormsAPI::GoogleFormsAPI(QObject* parent)
 		: QObject(parent)
-		, m_networkManager{ new QNetworkAccessManager{ this } }
 	{
-		this->setIncludeFormInResponse(true);
 
 		qWarning() << "Google Forms API needs an access token. Make sure to set it.";
 
@@ -102,7 +100,6 @@ namespace m0st4fa::forms {
 		};
 
 		QJsonDocument jsonDoc{ object };
-
 
 		QByteArray json = jsonDoc.toJson();
 
@@ -229,7 +226,7 @@ namespace m0st4fa::forms {
 
 	QJsonDocument GoogleFormsAPI::_execute_request(const QNetworkRequest& request)
 	{
-		QNetworkAccessManager* networkManager = new QNetworkAccessManager{};
+		QNetworkAccessManager* networkManager = new QNetworkAccessManager{this};
 
 		// Creating the reply
 		QNetworkReply* reply = networkManager->get(request);
@@ -265,7 +262,7 @@ namespace m0st4fa::forms {
 
 	QJsonDocument GoogleFormsAPI::_execute_request(const QNetworkRequest& request, const QByteArray& payload)
 	{
-		QNetworkAccessManager* networkManager = new QNetworkAccessManager{};
+		QNetworkAccessManager* networkManager = new QNetworkAccessManager{this};
 
 		// Creating the reply
 		QNetworkReply* reply = networkManager->post(request, payload);

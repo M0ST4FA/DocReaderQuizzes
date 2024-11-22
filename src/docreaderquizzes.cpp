@@ -4,7 +4,6 @@
 
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
-	, ui(new Ui::DocReaderQuizzesClass())
 {
 	ui->setupUi(this);
 	this->_set_copyright_info();
@@ -27,7 +26,6 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 
 DocReaderQuizzes::~DocReaderQuizzes()
 {
-	delete ui;
 }
 
 void DocReaderQuizzes::form_created(std::shared_ptr<Form> form)
