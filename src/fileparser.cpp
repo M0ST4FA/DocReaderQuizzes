@@ -6,13 +6,17 @@
 #include <QFile>
 
 
-FileParser::FileParser(const QString& path)
+FileParser::FileParser(const QString& path, QObject* parent) : QObject {parent}
 {
 
 	if (!path.isEmpty())
 		_open_and_read_file(path);
 
 }
+
+const QVector<QChar> FileParser::PREFIX_INDICATOR_DELIMETERS = {'(', '-'};
+const QVector<QChar> FileParser::POSTFIX_INDICATOR_DELIMETERS = { '.', '-', ')'};
+const QChar FileParser::CORRECTNESS_INDICATOR = '*';
 
 QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 {
@@ -177,28 +181,6 @@ QJsonObject FileParser::_parse_question_title()
 	};
 }
 
-QJsonObject FileParser::_parse_question_option()
-{
-
-	// Question option has:
-	// 1. indicator
-	// 2. text
-
-	bool isCorrectAnswer = _check_correct_answer();
-	QString optionIndicator = _parse_option_indicator();
-
-	if (optionIndicator.isEmpty())
-		return QJsonObject{};
-
-	QString optionText = _parse_option_text();
-
-	return QJsonObject{
-		std::pair<QString, QJsonValue>{"isCorrectAnswer", isCorrectAnswer},
-		std::pair<QString, QJsonValue>{"indicator", optionIndicator},
-		std::pair<QString, QJsonValue>{"text", optionText}
-	};
-}
-
 QString FileParser::_parse_question_indicator()
 {
 
@@ -206,23 +188,27 @@ QString FileParser::_parse_question_indicator()
 
 	_clear_white_spaces();
 
+	// Parse the prefix delimiter
+	_parse_prefix_indicator_delimiter();
+
+	// Parse the number
 	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
-		if (c == ".") {
-			this->m_index++; // skip it
-			break;
-		}
-
-		if (c.isNumber())
+		if (c.isNumber()) {
 			indicator += c;
+			this->m_currentPosition.charNumber++;
+		}
 		else {
 			break;
 		}
 
 	}
 
+	// Parse the postfix delimiter
+	_parse_postfix_indicator_delimiter();
+	
 	return indicator;
 }
 
@@ -233,13 +219,15 @@ QString FileParser::_parse_question_text()
 
 	_clear_white_spaces();
 
-	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
+	for (; this->m_index < this->m_fileContent.size(); this->m_index++, this->m_currentPosition.charNumber++) { // Whenever index++, then charNumber++
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
 		if (c == "\n") {
 			if (_is_option_next()) {
 				this->m_index++; // skip it
+				this->m_currentPosition.lineNumber++;
+				this->m_currentPosition.charNumber = 1;
 				break;
 			}
 			else
@@ -275,20 +263,41 @@ bool FileParser::_check_correct_answer()
 }
 
 // Parsing question options
+QJsonObject FileParser::_parse_question_option()
+{
+
+	// Question option has:
+	// 1. indicator
+	// 2. text
+
+	bool isCorrectAnswer = _check_correct_answer();
+	QString optionIndicator = _parse_option_indicator();
+
+	if (optionIndicator.isEmpty())
+		return QJsonObject{};
+
+	QString optionText = _parse_option_text();
+
+	return QJsonObject{
+		std::pair<QString, QJsonValue>{"isCorrectAnswer", isCorrectAnswer},
+		std::pair<QString, QJsonValue>{"indicator", optionIndicator},
+		std::pair<QString, QJsonValue>{"text", optionText}
+	};
+}
+
 QString FileParser::_parse_option_indicator()
 {
 	QString indicator;
 
 	_clear_white_spaces();
 
-	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
+	// Parse the prefix delimiter
+	_parse_prefix_indicator_delimiter();
+
+	// Parse the number
+	for (; this->m_index < this->m_fileContent.size(); this->m_index++, this->m_currentPosition.charNumber++) {
 
 		QChar c = this->m_fileContent.at(this->m_index);
-
-		if (c == ".") {
-			this->m_index++; // skip it
-			break;
-		}
 
 		if (c.isLetter())
 			indicator += c;
@@ -297,6 +306,9 @@ QString FileParser::_parse_option_indicator()
 		}
 
 	}
+
+	// Parse the postfix delimiter
+	_parse_postfix_indicator_delimiter();
 
 	return indicator;
 }
@@ -307,12 +319,13 @@ QString FileParser::_parse_option_text()
 
 	_clear_white_spaces();
 
-	for (; this->m_index < this->m_fileContent.size(); this->m_index++) {
+	for (; this->m_index < this->m_fileContent.size(); this->m_index++, this->m_currentPosition.charNumber++) {
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
 		if (c == "\n") {
 			this->m_index++; // skip it
+			this->m_currentPosition.charNumber++;
 			break;
 		}
 
@@ -327,55 +340,92 @@ QString FileParser::_parse_option_text()
 	return text;
 }
 
+void FileParser::_parse_prefix_indicator_delimiter()
+{
+	if (this->m_index >= this->m_fileContent.size())
+		return;
+
+	QChar currentChar = this->m_fileContent.at(this->m_index);
+
+	if (PREFIX_INDICATOR_DELIMETERS.contains(currentChar)) {
+		this->m_index++;
+		this->m_currentPosition.charNumber++;
+	}
+}
+
+void FileParser::_parse_postfix_indicator_delimiter()
+{
+	if (this->m_index >= this->m_fileContent.size())
+		return;
+
+	QChar currentChar = this->m_fileContent.at(this->m_index);
+
+	if (POSTFIX_INDICATOR_DELIMETERS.contains(currentChar)) {
+		this->m_index++;
+		this->m_currentPosition.charNumber++;
+	}
+}
+
 // Lookahead functions
 bool FileParser::_is_option_next()
 {
 	
-	return _is_option_indicator_next(this->m_index);
+	return _is_indicator_next(true, this->m_index);
 }
 
-bool FileParser::_is_option_indicator_next(qsizetype startIndex)
+bool FileParser::_is_indicator_next(bool option, qsizetype startIndex)
 {
-	bool foundOption = true;
-
 	// What we find is:
 	// 1. potential white space (we skip it)
-	// 2. option indicator, option or text (we check for characters)
+	// 2. we check for correctness indicator
+	// 2. we check for prefix delimiter
 	// 3. if we find option indicator, it will be followed by "." and then no new line
 	// 4. if we find text, then it may be question text. It will be alphanumerical, so if we find alphanumerical data, this means we've found question text. (we check for numerical data)
 
-	qsizetype nonWhiteSpaceIndex = _next_non_white_space_at(startIndex);
+	qsizetype index = _next_non_white_space_at(startIndex);
 
-	for (qsizetype i = nonWhiteSpaceIndex; i < this->m_fileContent.size(); i++) {
+	// Check for correctness indicator (but only if we're checking for an option indicator)
+	if (option && _is_correctness_inicator_next(index))
+		return true; // only an option could have a correctness indicator
 
-		QChar c = this->m_fileContent.at(i);
+	// Check for prefix delimiter
+	if (_is_prefix_indicator_delimiter_next(startIndex))
+		index++;
 
-		if (c == ".") {
+	QChar c = this->m_fileContent.at(index);
 
-			if (this->m_fileContent.at(i + 1) == "\n")
-				foundOption = false;
+	// Check for indicator text
+	if (option) {
 
-			break;
+		if (c.isLetter()) {
+			index++;
+			emit warning(ParserWarning{
+				.type = ParserWarning::POSSIBLE_OPTION_BEGINNING,
+				.position = this->m_currentPosition 
+				});
 		}
-
-		if (c == "\n") {
-			foundOption = false;
-			break;
-		}
-
-		if (c == "*")
-			break; // Only an option could possibly have *
-		
-		if (c.isLetter())
-			continue;
-		else {
-			foundOption = false;
-			break;
-		}
+		else
+			return false;
 
 	}
+	else 
+		for (; index < this->m_fileContent.size(); index++) {
 
-	return foundOption;
+			QChar c = this->m_fileContent.at(index);
+
+			if (c.isSpace())
+				return false;
+
+			if (c.isDigit())
+				continue;
+			else
+				break;
+		}
+
+	if(!_is_postfix_indicator_delimiter_next(index))
+		return false;
+
+	return true;
 }
 
 qsizetype FileParser::_next_non_white_space_at(qsizetype startIndex)
@@ -394,6 +444,35 @@ qsizetype FileParser::_next_non_white_space_at(qsizetype startIndex)
 	return startIndex;
 }
 
+bool FileParser::_is_question_next()
+{
+	return _is_indicator_next(false, this->m_index);
+}
+
+bool FileParser::_is_prefix_indicator_delimiter_next(qsizetype index)
+{
+	if (this->m_index >= this->m_fileContent.size())
+		return false;
+
+	return PREFIX_INDICATOR_DELIMETERS.contains(this->m_fileContent.at(index));
+}
+
+bool FileParser::_is_postfix_indicator_delimiter_next(qsizetype index)
+{
+	if (this->m_index >= this->m_fileContent.size())
+		return false;
+
+	return POSTFIX_INDICATOR_DELIMETERS.contains(this->m_fileContent.at(index));
+}
+
+inline bool FileParser::_is_correctness_inicator_next(qsizetype index)
+{
+	if (this->m_index >= this->m_fileContent.size())
+		return false;
+
+	return this->m_fileContent.at(index) == CORRECTNESS_INDICATOR;
+}
+
 // Dealing with whitespace
 void FileParser::_clear_white_spaces()
 {
@@ -401,8 +480,16 @@ void FileParser::_clear_white_spaces()
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
-		if (c.isSpace())
+		if (c.isSpace()) {
+			if (c == '\n') {
+				this->m_currentPosition.lineNumber++;
+				this->m_currentPosition.charNumber = 1;
+			}
+			else
+				this->m_currentPosition.charNumber++;
+
 			continue;
+		}
 
 		return;
 	}
@@ -415,6 +502,7 @@ void FileParser::_reset_parser()
 	// Reset file state
 	this->m_file.close();
 	this->m_index = 0;
+	this->m_currentPosition = Position{};
 	this->m_fileContent.clear();
 
 	// Reset document

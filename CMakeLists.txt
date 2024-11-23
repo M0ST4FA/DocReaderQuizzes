@@ -29,6 +29,11 @@ endif()
 file(GLOB PROJECT_SOURCES "main.cpp" "include/*.h" "include/*.ui" "src/*.cpp")
 # QT_ADD_RESOURCES(PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.qrc")
 
+list(REMOVE_ITEM PROJECT_SOURCES
+"C:/Users/mosta/Desktop/Projects/Programming/Apps/DocReaderQuizzes/src/lexer.cpp")
+
+message(${PROJECT_SOURCES})
+
 qt_add_executable(Quizzes ${PROJECT_SOURCES} ${WIN32_RESOURCES})
 target_include_directories(Quizzes PRIVATE "include")
 
