@@ -4,11 +4,11 @@ A simple application that converts a text file into a Google Forms quiz.
 
 ## Table of Contents
 - [About The Project](#about-the-project)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
+- [Getting Started](#getting-started.
+- [Usage](#usage.
 - [Text File Specification/Format](#text-file-specification)
 - [Roadmap](#roadmap)
-- [License](#license)
+- [License](#license.
 - [Third-party Libraries](#third-party-libraries)
 
 ## About The Project
@@ -21,7 +21,7 @@ To get a local copy up and running follow these simple steps.
 
 ### Dependencies
 
-- Qt 6.8.x (dynamically-linked)
+- Qt 6.8.x (dynamically-linked.
 
 ### Installation
 
@@ -96,7 +96,7 @@ Notice how  the first question spans multiple lines. Also notice that you can in
 
 ## License
 
-See [LICENSE](LICENSE) for more information.
+See [LICENSE](LICENSE. for more information.
 
 ## Third-party Libraries
 

@@ -226,11 +226,12 @@ namespace m0st4fa::forms {
 
 	QJsonDocument GoogleFormsAPI::_execute_request(const QNetworkRequest& request)
 	{
-		QNetworkAccessManager* networkManager = new QNetworkAccessManager{this};
+		QNetworkAccessManager* networkManager = new QNetworkAccessManager{};
 
 		// Creating the reply
 		QNetworkReply* reply = networkManager->get(request);
 
+		// Blocking the thread until the reply's data is ready
 		// Blocking the thread until the reply's data is ready
 		QEventLoop eventLoop;
 		connect(reply, &QNetworkReply::finished, &eventLoop, &QEventLoop::quit);
@@ -262,7 +263,7 @@ namespace m0st4fa::forms {
 
 	QJsonDocument GoogleFormsAPI::_execute_request(const QNetworkRequest& request, const QByteArray& payload)
 	{
-		QNetworkAccessManager* networkManager = new QNetworkAccessManager{this};
+		QNetworkAccessManager* networkManager = new QNetworkAccessManager{};
 
 		// Creating the reply
 		QNetworkReply* reply = networkManager->post(request, payload);

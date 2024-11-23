@@ -123,6 +123,9 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 
 	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
 
+	for (const CreateItemRequest& req : requests)
+		qInfo() << req.toJson();
+
 	if (requests.isEmpty()) {
 		QMessageBox::critical(this, "", "The provided file is either empty or it doesn't adhere to the correct syntax.");
 		return;
