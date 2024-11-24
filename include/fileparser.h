@@ -34,7 +34,9 @@ enum WarningTag {
 
 enum ErrorTag {
 	INCORRECT_INDICATOR,
-	CORRECTNESS_INDICATOR_IN_WRONG_PLACE
+	CORRECTNESS_INDICATOR_IN_WRONG_PLACE,
+	NO_CORRECT_OPTION,
+	ABUNDANT_CORRECT_OPTIONS
 };
 
 struct StatusReport {
@@ -45,6 +47,7 @@ struct StatusReport {
 	QString report;
 	const QString& filePath;
 	const QString& fileContent;
+	const char* function = nullptr;
 
 	QString toString();
 };

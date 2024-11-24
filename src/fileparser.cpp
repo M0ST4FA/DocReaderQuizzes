@@ -152,15 +152,50 @@ QJsonObject FileParser::_parse_question()
 
 	QJsonArray options;
 
+	int correctOptionNum = 0;
+
 	while (true) {
 
 		QJsonObject option = _parse_question_option();
+
+		if (option.value("isCorrectAnswer").toBool())
+			correctOptionNum++;
 
 		if (option.isEmpty())
 			break;
 
 		options.append(option);
 	}
+
+	if (correctOptionNum == 0) {
+		this->m_foundError = true;
+		emit reportStatus(StatusReport{
+		.level = ReportLevel::ERROR,
+		.tag = ErrorTag::NO_CORRECT_OPTION,
+		.position = this->m_currentPosition,
+		.report = "Every question must specify one, and only one correct option. This question specifies non.",
+		.filePath = m_file.fileName(),
+		.fileContent = m_fileContent,
+		.function = __FUNCTION__
+			});
+		return QJsonObject{};
+	}
+
+	if (correctOptionNum > 1) {
+		this->m_foundError = true;
+		emit reportStatus(StatusReport{
+		.level = ReportLevel::ERROR,
+		.tag = ErrorTag::ABUNDANT_CORRECT_OPTIONS,
+		.position = this->m_currentPosition,
+		.report = "Every question must specify one, and only one correct option. This question specifies more than one.",
+		.filePath = m_file.fileName(),
+		.fileContent = m_fileContent,
+		.function = __FUNCTION__
+			});
+		return QJsonObject{};
+	}
+
+
 
 	return QJsonObject{
 		std::pair<QString, QJsonValue>{"title", title},
@@ -195,6 +230,10 @@ QString FileParser::_parse_question_indicator()
 
 	_clear_white_spaces();
 
+	if (this->m_index >= this->m_fileContent.size()) {
+		return QString{};
+	}
+
 	QChar c = this->m_fileContent.at(this->m_index);
 
 	// Parse the prefix delimiter
@@ -220,9 +259,10 @@ QString FileParser::_parse_question_indicator()
 			.level = ReportLevel::ERROR,
 			.tag = ErrorTag::INCORRECT_INDICATOR,
 			.position = this->m_currentPosition,
-			.report = "Question indicator must be a numeral. Option indicator must be a letter. Either this indicator is empty or it doesn't have the correct format.",
+			.report = "Question indicator must be a numeral. Option indicator must be a letter. Either this indicator is empty or it doesn't have the correct format",
 			.filePath = m_file.fileName(),
-			.fileContent = m_fileContent
+			.fileContent = m_fileContent,
+			.function = __FUNCTION__
 		});
 
 	// Parse the postfix delimiter
@@ -256,7 +296,8 @@ QString FileParser::_parse_question_text()
 					.position = this->m_currentPosition,
 					.report = "This could possibly be the beginning of an option or the continuation of a question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two.",
 					.filePath = m_file.fileName(),
-					.fileContent = m_fileContent
+					.fileContent = m_fileContent,
+					.function = __FUNCTION__
 						});
 
 				break;
@@ -318,9 +359,10 @@ QJsonObject FileParser::_parse_question_option()
 				.level = ReportLevel::ERROR,
 				.tag = ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE,
 				.position = this->m_currentPosition,
-				.report = "The correctness indicator '*' can only be in front of an option indicator. It cannot be in front of a question indicator. You may have put it here incorrectly. Remove it and add in front of the correct option.",
+				.report = "The correctness indicator '*' can only be in front of an option indicator. It cannot be in front of a question indicator. You may have put it here incorrectly. Remove it and add in front of the correct option. ",
 				.filePath = m_file.fileName(),
-				.fileContent = m_fileContent
+				.fileContent = m_fileContent,
+				.function = __FUNCTION__
 				});
 		}
 
@@ -580,14 +622,19 @@ QString StatusReport::toString()
 	QString data;
 	QTextStream stream{&data, QIODeviceBase::Append};
 
+	// Function info
+#ifdef _DEBUG
+	stream << "Function <" << this->function << ">\n";
+#endif
+
 	// File and line
-	stream << "File " << filePath << ", Line " << this->position.lineNumber << "\n\t";
+	stream << "File <" << filePath << ">, Line " << this->position.lineNumber << "\n\t";
 
 	// Context
-	int beginning = 0;
-	int end = 0;
+	int beginning = this->position.index < this->fileContent.size() ? this->position.index : this->position.index - 1;
+	int end = this->fileContent.size() - 1;
 
-	for (int i = this->position.index; i >= 0; i--) {
+	for (int i = this->position.index; i >= 0 && i < this->fileContent.size(); i--) {
 
 		QChar c = this->fileContent.at(i);
 
@@ -632,6 +679,13 @@ QString StatusReport::toString()
 			break;
 		case ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE:
 			tag = "CorrectnessIndicatorInTheWrongPlace: ";
+			break;
+		case ErrorTag::NO_CORRECT_OPTION:
+			tag = "NoCorrectOption: ";
+			break;
+		case ErrorTag::ABUNDANT_CORRECT_OPTIONS:
+			tag = "AbundantCorrectOptions: ";
+			break;
 		default:
 			break;
 		}

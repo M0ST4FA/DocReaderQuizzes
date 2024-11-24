@@ -189,6 +189,8 @@ void DocReaderQuizzes::_reset_to_new_quiz_state()
 	this->ui->formTitleLineEdit->setText("");
 	this->ui->formDocumentLineEdit->setText("");
 	this->ui->formDescriptionLineEdit->setText("");
+
+	//this->ui->reportingTextEdit->setText("");
 }
 
 void DocReaderQuizzes::_set_copyright_info()
