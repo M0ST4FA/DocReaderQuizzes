@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>534</width>
-    <height>228</height>
+    <height>344</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -146,6 +146,13 @@
         <widget class="QPushButton" name="createQuizBtn">
          <property name="text">
           <string>Create Quiz</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="reportingTextEdit">
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

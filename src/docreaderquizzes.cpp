@@ -6,6 +6,8 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
 {
 	ui->setupUi(this);
+	this->m_parser->setParent(this);
+
 	this->_set_copyright_info();
 
 	this->m_formsApi->setIncludeFormInResponse(true);
@@ -21,11 +23,41 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	connect(this->m_formsApi, &GoogleFormsAPI::errorOccurred, [this](const QString& errorStr) {
 		qInfo() << errorStr;
 		});
+	connect(this->m_parser, &FileParser::reportStatus, [this](StatusReport report) {
 
+		QColor defaultColor = this->ui->reportingTextEdit->textColor();
+
+		switch (report.level)
+		{
+		case ReportLevel::INFO:
+			this->ui->reportingTextEdit->setTextColor(QColor{135, 206, 235});
+			break;
+
+		case ReportLevel::WARNING:
+			this->ui->reportingTextEdit->setTextColor(QColor{255, 165, 0});
+			break;
+
+		case ReportLevel::ERROR:
+			this->ui->reportingTextEdit->setTextColor(QColor{255, 0, 0});
+			break;
+
+		default:
+			break;
+		}
+
+		this->ui->reportingTextEdit->append(report.toString());
+		this->ui->reportingTextEdit->setTextColor(defaultColor);
+	});
+	connect(this->m_parser, &FileParser::aborted, [this]() {
+
+		QMessageBox::critical(this, "DocReaderQuizzes", "Found errors while parsing the file. The form will not be created. Correct the errors and then try again.");
+
+		});
 }
 
 DocReaderQuizzes::~DocReaderQuizzes()
 {
+	delete this->m_parser;
 }
 
 void DocReaderQuizzes::form_created(std::shared_ptr<Form> form)
@@ -122,6 +154,9 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	this->ui->createQuizBtn->setText("Parsing File...");
 
 	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
+
+	if (requests.isEmpty())
+		return;
 
 	for (const CreateItemRequest& req : requests)
 		qInfo() << req.toJson();

@@ -64,7 +64,7 @@ private:
 	} m_temporaryInfo;
 
 	// Parsing
-	std::shared_ptr<FileParser> m_parser{ new FileParser{} };
+	FileParser* m_parser{ new FileParser{} };
 
 	// Helper functions
 	void _reset_to_new_quiz_state();

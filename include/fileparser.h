@@ -8,27 +8,46 @@
 struct Position {
 	int charNumber = 1;
 	int lineNumber = 1;
+	int index = 0;
+
+	void adjustForNewLine() {
+		this->lineNumber++;
+		this->charNumber = 1;
+		this->index++;
+	}
+
+	void addCharacter() {
+		this->charNumber++;
+		this->index++;
+	}
 };
 
-struct ParserWarning {
+enum ReportLevel {
+	INFO,
+	WARNING,
+	ERROR
+};
 
-	enum Type {
-		POSSIBLE_OPTION_BEGINNING,
-	} type;
+enum WarningTag {
+	POSSIBLE_OPTION_BEGINNING,
+};
 
+enum ErrorTag {
+	INCORRECT_INDICATOR,
+	CORRECTNESS_INDICATOR_IN_WRONG_PLACE
+};
+
+struct StatusReport {
+
+	ReportLevel level;
+	int tag;
 	Position position;
+	QString report;
+	const QString& filePath;
+	const QString& fileContent;
 
+	QString toString();
 };
-
-struct ParserError {
-
-	enum Type {
-
-	} type;
-
-	Position position;
-};
-
 
 class FileParser : public QObject {
 	
@@ -47,8 +66,8 @@ public:
 
 signals:
 
-	void warning(ParserWarning warning);
-	void critical(ParserError error);
+	void reportStatus(StatusReport report);
+	void aborted();
 
 private:
 
@@ -61,6 +80,7 @@ private:
 	qsizetype m_index = 0;
 	Position m_currentPosition;
 	QString m_fileContent;
+	bool m_foundError = false;
 
 	// Json document intermediate generated from text file
 	QJsonDocument m_document;
@@ -86,7 +106,7 @@ private:
 
 	// Indicator parsing
 	void _parse_prefix_indicator_delimiter();
-	void _parse_postfix_indicator_delimiter();
+	bool _parse_postfix_indicator_delimiter();
 
 	// Lookahead functions (to reduce context sensitivity)
 	/**

@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QFile>
+#include <QMessageBox>
 
 
 FileParser::FileParser(const QString& path, QObject* parent) : QObject {parent}
@@ -29,6 +30,12 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 	using Location = m0st4fa::forms::update_form::Location;
 
 	QJsonDocument doc = _parse_file();
+
+	if (this->m_foundError) {
+		emit aborted();
+		return {}; // Return an empty request vector
+	}
+
 	QJsonArray questions = doc.array();
 
 	unsigned int location = 0;
@@ -188,6 +195,8 @@ QString FileParser::_parse_question_indicator()
 
 	_clear_white_spaces();
 
+	QChar c = this->m_fileContent.at(this->m_index);
+
 	// Parse the prefix delimiter
 	_parse_prefix_indicator_delimiter();
 
@@ -198,13 +207,23 @@ QString FileParser::_parse_question_indicator()
 
 		if (c.isNumber()) {
 			indicator += c;
-			this->m_currentPosition.charNumber++;
+			this->m_currentPosition.addCharacter();
 		}
 		else {
 			break;
 		}
 
 	}
+
+	if (indicator.isEmpty() && this->m_index < this->m_fileContent.size())
+		emit reportStatus(StatusReport{
+			.level = ReportLevel::ERROR,
+			.tag = ErrorTag::INCORRECT_INDICATOR,
+			.position = this->m_currentPosition,
+			.report = "Question indicator must be a numeral. Option indicator must be a letter. Either this indicator is empty or it doesn't have the correct format.",
+			.filePath = m_file.fileName(),
+			.fileContent = m_fileContent
+		});
 
 	// Parse the postfix delimiter
 	_parse_postfix_indicator_delimiter();
@@ -216,6 +235,7 @@ QString FileParser::_parse_question_text()
 {
 
 	QString text;
+	int nlCount = 0;
 
 	_clear_white_spaces();
 
@@ -223,19 +243,35 @@ QString FileParser::_parse_question_text()
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
-		if (c == "\n") {
+		if (c == '\n') {
+			this->m_currentPosition.adjustForNewLine();
+			nlCount++;
 			if (_is_option_next()) {
 				this->m_index++; // skip it
-				this->m_currentPosition.lineNumber++;
-				this->m_currentPosition.charNumber = 1;
+
+				if (nlCount == 1)
+					emit reportStatus(StatusReport{
+					.level = ReportLevel::WARNING,
+					.tag = WarningTag::POSSIBLE_OPTION_BEGINNING,
+					.position = this->m_currentPosition,
+					.report = "This could possibly be the beginning of an option or the continuation of a question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two.",
+					.filePath = m_file.fileName(),
+					.fileContent = m_fileContent
+						});
+
 				break;
 			}
 			else
 				continue; // it will already be skipped in the next iteration
 		}
 
-		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct())
+		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct()) {
 			text += c;
+			if (c == '\n')
+				this->m_currentPosition.adjustForNewLine();
+			else
+				this->m_currentPosition.addCharacter();
+		}
 		else {
 			break;
 		}
@@ -256,6 +292,7 @@ bool FileParser::_check_correct_answer()
 
 	if (c == "*") {
 		this->m_index++;
+		this->m_currentPosition.addCharacter();
 		return true;
 	}
 
@@ -273,8 +310,22 @@ QJsonObject FileParser::_parse_question_option()
 	bool isCorrectAnswer = _check_correct_answer();
 	QString optionIndicator = _parse_option_indicator();
 
-	if (optionIndicator.isEmpty())
+	if (optionIndicator.isEmpty()) {
+
+		if (isCorrectAnswer) {
+			this->m_foundError = true;
+			emit reportStatus(StatusReport{
+				.level = ReportLevel::ERROR,
+				.tag = ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE,
+				.position = this->m_currentPosition,
+				.report = "The correctness indicator '*' can only be in front of an option indicator. It cannot be in front of a question indicator. You may have put it here incorrectly. Remove it and add in front of the correct option.",
+				.filePath = m_file.fileName(),
+				.fileContent = m_fileContent
+				});
+		}
+
 		return QJsonObject{};
+	}
 
 	QString optionText = _parse_option_text();
 
@@ -294,20 +345,31 @@ QString FileParser::_parse_option_indicator()
 	// Parse the prefix delimiter
 	_parse_prefix_indicator_delimiter();
 
-	// Parse the number
-	for (; this->m_index < this->m_fileContent.size(); this->m_index++, this->m_currentPosition.charNumber++) {
+	// Parse the letter
+	if (this->m_index < this->m_fileContent.size()) {
 
 		QChar c = this->m_fileContent.at(this->m_index);
 
-		if (c.isLetter())
+		if (c.isLetter()) {
 			indicator += c;
-		else {
-			break;
+			this->m_index++;
+			this->m_currentPosition.addCharacter();
 		}
-
+		
 	}
 
-	// Parse the postfix delimiter
+	//// Parse the postfix delimiter
+	//if (_parse_postfix_indicator_delimiter() && indicator.isEmpty()) { // If you don't find it
+	//	this->m_foundError = true;
+	//	emit reportStatus(StatusReport{
+	//		.level = ReportLevel::ERROR,
+	//		.tag = ErrorTag::INCORRECT_OPTION_INDICATOR,
+	//		.position = this->m_currentPosition,
+	//		.report = "Incorrect option indicator. Expected a letter but found something else.",
+	//		.filePath = this->m_file.fileName(),
+	//		.fileContent = this->m_fileContent
+	//		});
+	//}
 	_parse_postfix_indicator_delimiter();
 
 	return indicator;
@@ -325,12 +387,17 @@ QString FileParser::_parse_option_text()
 
 		if (c == "\n") {
 			this->m_index++; // skip it
-			this->m_currentPosition.charNumber++;
+			this->m_currentPosition.adjustForNewLine();
 			break;
 		}
 
-		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct())
+		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct()) {
 			text += c;
+			if (c == '\n')
+				this->m_currentPosition.adjustForNewLine();
+			else
+				this->m_currentPosition.addCharacter();
+		}
 		else {
 			break;
 		}
@@ -349,21 +416,24 @@ void FileParser::_parse_prefix_indicator_delimiter()
 
 	if (PREFIX_INDICATOR_DELIMETERS.contains(currentChar)) {
 		this->m_index++;
-		this->m_currentPosition.charNumber++;
+		this->m_currentPosition.addCharacter();
 	}
 }
 
-void FileParser::_parse_postfix_indicator_delimiter()
+bool FileParser::_parse_postfix_indicator_delimiter()
 {
 	if (this->m_index >= this->m_fileContent.size())
-		return;
+		return false;
 
 	QChar currentChar = this->m_fileContent.at(this->m_index);
 
 	if (POSTFIX_INDICATOR_DELIMETERS.contains(currentChar)) {
 		this->m_index++;
-		this->m_currentPosition.charNumber++;
+		this->m_currentPosition.addCharacter();
+		return true;
 	}
+
+	return false;
 }
 
 // Lookahead functions
@@ -399,10 +469,6 @@ bool FileParser::_is_indicator_next(bool option, qsizetype startIndex)
 
 		if (c.isLetter()) {
 			index++;
-			emit warning(ParserWarning{
-				.type = ParserWarning::POSSIBLE_OPTION_BEGINNING,
-				.position = this->m_currentPosition 
-				});
 		}
 		else
 			return false;
@@ -482,11 +548,10 @@ void FileParser::_clear_white_spaces()
 
 		if (c.isSpace()) {
 			if (c == '\n') {
-				this->m_currentPosition.lineNumber++;
-				this->m_currentPosition.charNumber = 1;
+				this->m_currentPosition.adjustForNewLine();
 			}
 			else
-				this->m_currentPosition.charNumber++;
+				this->m_currentPosition.addCharacter();
 
 			continue;
 		}
@@ -507,4 +572,72 @@ void FileParser::_reset_parser()
 
 	// Reset document
 	this->m_document = QJsonDocument{};
+}
+
+QString StatusReport::toString()
+{
+
+	QString data;
+	QTextStream stream{&data, QIODeviceBase::Append};
+
+	// File and line
+	stream << "File " << filePath << ", Line " << this->position.lineNumber << "\n\t";
+
+	// Context
+	int beginning = 0;
+	int end = 0;
+
+	for (int i = this->position.index; i >= 0; i--) {
+
+		QChar c = this->fileContent.at(i);
+
+		if (c == '\n') {
+			beginning = i + 1;
+			break;
+		}
+	}
+
+	for (int i = this->position.index + 1; i < fileContent.length(); i++) {
+
+		QChar c = this->fileContent.at(i);
+
+		if (c == '\n') {
+			end = i;
+			break;
+		}
+	}
+
+	QString context = this->fileContent.sliced(beginning, end - beginning);
+
+	stream << context << "\n";
+
+	// Tag
+	QString tag;
+
+	if (this->level == ReportLevel::WARNING)
+		switch (this->tag) {
+
+		case WarningTag::POSSIBLE_OPTION_BEGINNING:
+			tag = "PossibleOptionBeginningWarning: ";
+			break;
+		default:
+			break;
+		}
+
+	if (this->level == ReportLevel::ERROR) {
+		switch (this->tag) {
+
+		case ErrorTag::INCORRECT_INDICATOR:
+			tag = "IncorrectIndicator: ";
+			break;
+		case ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE:
+			tag = "CorrectnessIndicatorInTheWrongPlace: ";
+		default:
+			break;
+		}
+	}
+
+	stream << tag << report << "\n--------------------------------------";
+
+	return data;
 }
