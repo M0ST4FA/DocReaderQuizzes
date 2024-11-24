@@ -101,6 +101,11 @@ void FileParser::setFilePath(const QString& path)
 	_open_and_read_file(path);
 }
 
+bool FileParser::foundError() const
+{
+	return this->m_foundError;
+}
+
 void FileParser::_open_and_read_file(const QString& path)
 {
 	this->m_file.setFileName(path);
@@ -173,7 +178,7 @@ QJsonObject FileParser::_parse_question()
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::NO_CORRECT_OPTION,
 		.position = this->m_currentPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies non.",
+		.report = "Every question must specify one, and only one correct option. This question specifies non. Look at the question before the one displayed.",
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -187,7 +192,7 @@ QJsonObject FileParser::_parse_question()
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::ABUNDANT_CORRECT_OPTIONS,
 		.position = this->m_currentPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies more than one.",
+		.report = "Every question must specify one, and only one correct option. This question specifies more than one. Look at the question before the one displayed.",
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__

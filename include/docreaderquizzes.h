@@ -62,11 +62,20 @@ private:
 			updated = false;
 		};
 	} m_temporaryInfo;
+	enum State {
+		WAITING_FOR_FILE,
+		PARSING_FILE,
+		CREATING_FORM,
+	} m_state = WAITING_FOR_FILE;
 
 	// Parsing
 	FileParser* m_parser{ new FileParser{} };
 
 	// Helper functions
+	QVector<CreateItemRequest> _parse_file();
+	void _create_form(const QVector<CreateItemRequest>&);
 	void _reset_to_new_quiz_state();
 	void _set_copyright_info();
+	void _set_createQuizBtn_state();
+	void _set_state(State);
 };

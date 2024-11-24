@@ -149,23 +149,44 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	using namespace m0st4fa::forms;
 	using namespace m0st4fa::forms::update_form;
 
-	this->m_parser->setFilePath(m_temporaryInfo.filePath);
-	this->ui->createQuizBtn->setDisabled(true);
-	this->ui->createQuizBtn->setText("Parsing File...");
+	// Parse the file
+	QVector<CreateItemRequest> requests = this->_parse_file();
 
-	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
-
-	if (requests.isEmpty())
-		return;
-
-	for (const CreateItemRequest& req : requests)
-		qInfo() << req.toJson();
-
-	if (requests.isEmpty()) {
-		QMessageBox::critical(this, "", "The provided file is either empty or it doesn't adhere to the correct syntax.");
+	// Check for correct output of parsing
+	if (this->m_parser->foundError()) {
+		this->_set_state(WAITING_FOR_FILE);
 		return;
 	}
 
+	if (requests.isEmpty()) {
+		QMessageBox::critical(this, "DocReaderQuizzes", "The provided file is either empty or it doesn't adhere to the correct syntax.");
+		this->_set_state(WAITING_FOR_FILE);
+		return;
+	}
+
+	// Creating the form
+	this->_create_form(requests);
+}
+
+QVector<DocReaderQuizzes::CreateItemRequest> DocReaderQuizzes::_parse_file()
+{
+	// Parsing the file
+	this->m_parser->setFilePath(m_temporaryInfo.filePath);
+	this->_set_state(PARSING_FILE);
+
+	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
+
+#ifdef _DEBUG
+	for (const CreateItemRequest& req : requests)
+		qInfo() << req.toJson();
+#endif
+
+	return requests;
+}
+
+void DocReaderQuizzes::_create_form(const QVector<CreateItemRequest>& requests)
+{
+	// Creating the form
 	QString title = this->ui->formTitleLineEdit->text();
 	QString documentTitle = this->ui->formDocumentLineEdit->text();
 	QString description = this->ui->formDescriptionLineEdit->text();
@@ -174,23 +195,14 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	m_temporaryInfo.requests = requests;
 	m_temporaryInfo.updated = false;
 
-	this->ui->createQuizBtn->setText("Creating Quiz...");
+	this->_set_state(CREATING_FORM);
 	this->m_formsApi->createForm(title, documentTitle);
+
 }
 
 void DocReaderQuizzes::_reset_to_new_quiz_state()
 {
-	m_temporaryInfo.reset();
-
-	this->ui->createQuizBtn->setDisabled(true);
-	this->ui->createQuizBtn->setText("Create Quiz");
-	this->m_form = nullptr;
-
-	this->ui->formTitleLineEdit->setText("");
-	this->ui->formDocumentLineEdit->setText("");
-	this->ui->formDescriptionLineEdit->setText("");
-
-	//this->ui->reportingTextEdit->setText("");
+	this->_set_state(WAITING_FOR_FILE);
 }
 
 void DocReaderQuizzes::_set_copyright_info()
@@ -198,6 +210,59 @@ void DocReaderQuizzes::_set_copyright_info()
 	QWidget* authenticationPage = this->ui->authenticationPage;
 	QGridLayout* authPageLayout = dynamic_cast<QGridLayout*>(authenticationPage->layout());
 	this->ui->logoLabel->setPixmap(QPixmap{ "assets/icons/appicon.svg" }.scaled(QSize{ 100, 100 }));
+
+}
+
+void DocReaderQuizzes::_set_createQuizBtn_state()
+{
+
+	switch (this->m_state)
+	{
+	case WAITING_FOR_FILE:
+		this->ui->createQuizBtn->setEnabled(true);
+		this->ui->createQuizBtn->setText("Create Quiz");
+		break;
+	case PARSING_FILE:
+		this->ui->createQuizBtn->setEnabled(false);
+		this->ui->createQuizBtn->setText("Parsing File...");
+		break;
+	case CREATING_FORM:
+		this->ui->createQuizBtn->setEnabled(false);
+		this->ui->createQuizBtn->setText("Creating Quiz...");
+		break;
+	default:
+		this->ui->createQuizBtn->setEnabled(false);
+		this->ui->createQuizBtn->setText("Unhandled state");
+		break;
+	}
+
+}
+
+void DocReaderQuizzes::_set_state(State state)
+{
+	this->m_state = state;
+
+	this->_set_createQuizBtn_state();
+
+	switch (this->m_state)
+	{
+	case WAITING_FOR_FILE:
+		m_temporaryInfo.reset();
+
+		this->m_form = nullptr;
+
+		this->ui->formTitleLineEdit->setText("");
+		this->ui->formDocumentLineEdit->setText("");
+		this->ui->formDescriptionLineEdit->setText("");
+		break;
+	case PARSING_FILE:
+		this->ui->reportingTextEdit->clear();
+		break;
+	case CREATING_FORM:
+		break;
+	default:
+		break;
+	}
 
 }
 

@@ -67,6 +67,8 @@ public:
 
 	void setFilePath(const QString&);
 
+	bool foundError() const;
+
 signals:
 
 	void reportStatus(StatusReport report);
