@@ -131,6 +131,10 @@ QJsonDocument FileParser::_parse_file()
 	QJsonArray questions;
 
 	// Continue until an empty object is returned
+#ifdef _DEBUG
+	qInfo() << "LOGGING PARSED QUESTIOSN:";
+#endif
+
 	while (true) {
 
 		QJsonObject question = _parse_question();
@@ -139,8 +143,16 @@ QJsonDocument FileParser::_parse_file()
 			break;
 
 		questions.append(question);
+
+#ifdef _DEBUG
 		qInfo() << question;
+		qInfo() << "*************************";
+#endif
 	}
+
+#ifdef _DEBUG
+	qInfo() << "------------------------------------------------";
+#endif
 
 	return QJsonDocument{ questions };
 }

@@ -107,9 +107,14 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 	}
 	else { // if we're here, it means that the items have been created
 		
+#ifdef _DEBUG
+		qInfo() << "LOGGING REPLIES OBTAINED FROM SERVER:";
 		for (const UpdateResponse& reply : response.replies) {
 			qInfo() << reply.toJson();
+			qInfo() << "***************************";
 		}
+		qInfo() << "------------------------------------------------------";
+#endif
 
 		this->m_form = response.form;
 
@@ -133,7 +138,9 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 
 	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{}, "Text Files (*.txt)");
 
-	qInfo() << filePath;
+#ifdef _DEBUG
+	qDebug() << "Path of chosen file: " << filePath;
+#endif
 	
 	if (filePath.isEmpty()) {
 		QMessageBox::critical(this, "Error while processing chosen file.", "Either you didn't choose a file or the path is incorrect. Try to choose again.");
@@ -177,8 +184,12 @@ QVector<DocReaderQuizzes::CreateItemRequest> DocReaderQuizzes::_parse_file()
 	QVector<CreateItemRequest> requests = this->m_parser->parseFile();
 
 #ifdef _DEBUG
-	for (const CreateItemRequest& req : requests)
+	qInfo() << "LOGGING OBTAINED REQUESTS:";
+	for (const CreateItemRequest& req : requests) {
 		qInfo() << req.toJson();
+		qInfo() << "*****************";
+	}
+	qInfo() << "------------------------------------------------------------";
 #endif
 
 	return requests;
@@ -268,7 +279,10 @@ void DocReaderQuizzes::_set_state(State state)
 
 void DocReaderQuizzes::token_granted()
 {
-	qInfo() << this->m_sso->token();
+
+#ifdef _DEBUG
+	qInfo() << "Granted token:" << this->m_sso->token();
+#endif
 	this->m_authenticated = true;
 	this->m_formsApi->setAccessToken(this->m_sso->token());
 	this->ui->stackedWidget->setCurrentWidget(this->ui->applicationPage);
