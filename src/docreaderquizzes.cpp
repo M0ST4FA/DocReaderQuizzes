@@ -1,6 +1,7 @@
 #include "docreaderquizzes.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QClipboard>
 
 const QString DocReaderQuizzes::IMAGE_TO_TEXT_PROMPT = R"(Extract the text out of this image. Be conservative. Indicate the correct option by putting * before the letter denoting it. The correct option is colored red. Return the result in code font.)";
 const QString DocReaderQuizzes::FORMAT_TEXT_PROMPT = R"(Format the following text in the following format: questions begin with a numeral followed by dot. Options begin with a letter followed by dot. Return the result in code font.)";
@@ -124,7 +125,9 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 		QString formId = this->m_form->formId;
 		QString formLink = QString{"https://docs.google.com/forms/d/%0"}.arg(formId);
 
-		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nLink copied to your clipboard." }.arg(formLink));
+		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nLink copied to your clipboard." });
+
+		QApplication::clipboard()->setText(formLink);
 
 		this->_reset_to_new_quiz_state();
 	}
@@ -202,6 +205,13 @@ void DocReaderQuizzes::_create_form(const QVector<CreateItemRequest>& requests)
 {
 	// Creating the form
 	QString title = this->ui->formTitleLineEdit->text();
+
+	if (title.isEmpty()) {
+		QMessageBox::critical(this, "DocReaderQuizzes", "The form title is mandatory. You have entered one. Enter a form title and then try again.");
+		this->_set_state(WAITING_FOR_FILE);
+		return;
+	}
+
 	QString documentTitle = this->ui->formDocumentLineEdit->text();
 	QString description = this->ui->formDescriptionLineEdit->text();
 

@@ -96,7 +96,7 @@ Notice how  the first question spans multiple lines. Also notice that you can in
 
 ## License
 
-See [LICENSE](LICENSE. for more information.
+See [LICENSE](LICENSE). for more information.
 
 ## Third-party Libraries
 

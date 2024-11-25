@@ -184,6 +184,20 @@ QJsonObject FileParser::_parse_question()
 		options.append(option);
 	}
 
+	if (options.isEmpty()) {
+		this->m_foundError = true;
+		emit reportStatus(StatusReport{
+		.level = ReportLevel::ERROR,
+		.tag = ErrorTag::ZERO_OPTIONS_SPECIFIED,
+		.position = this->m_currentPosition,
+		.report = "This question has no option specified.",
+		.filePath = m_file.fileName(),
+		.fileContent = m_fileContent,
+		.function = __FUNCTION__
+			});
+		return QJsonObject{};
+	}
+
 	if (correctOptionNum == 0) {
 		this->m_foundError = true;
 		emit reportStatus(StatusReport{
@@ -271,7 +285,8 @@ QString FileParser::_parse_question_indicator()
 
 	}
 
-	if (indicator.isEmpty() && this->m_index < this->m_fileContent.size())
+	if (indicator.isEmpty() && this->m_index < this->m_fileContent.size()) {
+		this->m_foundError = true;
 		emit reportStatus(StatusReport{
 			.level = ReportLevel::ERROR,
 			.tag = ErrorTag::INCORRECT_INDICATOR,
@@ -280,7 +295,8 @@ QString FileParser::_parse_question_indicator()
 			.filePath = m_file.fileName(),
 			.fileContent = m_fileContent,
 			.function = __FUNCTION__
-		});
+			});
+	}
 
 	// Parse the postfix delimiter
 	_parse_postfix_indicator_delimiter();
@@ -323,17 +339,11 @@ QString FileParser::_parse_question_text()
 				continue; // it will already be skipped in the next iteration
 		}
 
-		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct()) {
-			text += c;
-			if (c == '\n')
-				this->m_currentPosition.adjustForNewLine();
-			else
-				this->m_currentPosition.addCharacter();
-		}
-		else {
-			break;
-		}
-
+		text += c;
+		if (c == '\n')
+			this->m_currentPosition.adjustForNewLine();
+		else
+			this->m_currentPosition.addCharacter();
 	}
 
 	return text;
@@ -414,7 +424,6 @@ QString FileParser::_parse_option_indicator()
 			this->m_index++;
 			this->m_currentPosition.addCharacter();
 		}
-		
 	}
 
 	//// Parse the postfix delimiter
@@ -450,16 +459,11 @@ QString FileParser::_parse_option_text()
 			break;
 		}
 
-		if (c.isLetterOrNumber() || c.isSpace() || c.isMark() || c.isPunct()) {
-			text += c;
-			if (c == '\n')
-				this->m_currentPosition.adjustForNewLine();
-			else
-				this->m_currentPosition.addCharacter();
-		}
-		else {
-			break;
-		}
+		text += c;
+		if (c == '\n')
+			this->m_currentPosition.adjustForNewLine();
+		else
+			this->m_currentPosition.addCharacter();
 
 	}
 
@@ -696,6 +700,9 @@ QString StatusReport::toString()
 			break;
 		case ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE:
 			tag = "CorrectnessIndicatorInTheWrongPlace: ";
+			break;
+		case ErrorTag::ZERO_OPTIONS_SPECIFIED:
+			tag = "ZeroOptionsSpecified: ";
 			break;
 		case ErrorTag::NO_CORRECT_OPTION:
 			tag = "NoCorrectOption: ";
