@@ -38,6 +38,8 @@ private:
 
 	// UI
 	std::shared_ptr<Ui::DocReaderQuizzesClass> ui{ new Ui::DocReaderQuizzesClass() };
+	static const QString IMAGE_TO_TEXT_PROMPT;
+	static const QString FORMAT_TEXT_PROMPT;
 
 	// Authentication
 	bool m_authenticated = false;

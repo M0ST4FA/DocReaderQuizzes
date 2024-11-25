@@ -2,6 +2,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+const QString DocReaderQuizzes::IMAGE_TO_TEXT_PROMPT = R"(Extract the text out of this image. Be conservative. Indicate the correct option by putting * before the letter denoting it. The correct option is colored red. Return the result in code font.)";
+const QString DocReaderQuizzes::FORMAT_TEXT_PROMPT = R"(Format the following text in the following format: questions begin with a numeral followed by dot. Options begin with a letter followed by dot. Return the result in code font.)";
+
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
 {
@@ -121,7 +124,7 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 		QString formId = this->m_form->formId;
 		QString formLink = QString{"https://docs.google.com/forms/d/%0"}.arg(formId);
 
-		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nYou can access it via this link: %1." }.arg(formLink));
+		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nLink copied to your clipboard." }.arg(formLink));
 
 		this->_reset_to_new_quiz_state();
 	}
@@ -214,6 +217,18 @@ void DocReaderQuizzes::_create_form(const QVector<CreateItemRequest>& requests)
 void DocReaderQuizzes::_reset_to_new_quiz_state()
 {
 	this->_set_state(WAITING_FOR_FILE);
+
+	QColor color = this->ui->reportingTextEdit->textColor();
+
+	this->ui->reportingTextEdit->setTextColor(QColor(135, 206, 235));
+
+	QString msg1 = "Prompt for converting image to MCQs\n------------------------------------------\n%0";
+	QString msg2 = "Prompt for formatting ill-formatted MCQs\n----------------------------------------------\n%0";
+
+	this->ui->reportingTextEdit->append(msg1.arg(IMAGE_TO_TEXT_PROMPT));
+	this->ui->reportingTextEdit->append(msg2.arg(FORMAT_TEXT_PROMPT));
+
+	this->ui->reportingTextEdit->setTextColor(color);
 }
 
 void DocReaderQuizzes::_set_copyright_info()

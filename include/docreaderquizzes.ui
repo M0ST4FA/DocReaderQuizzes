@@ -170,7 +170,7 @@
           <bool>true</bool>
          </property>
          <property name="placeholderText">
-          <string>Logs will appear here...</string>
+          <string/>
          </property>
         </widget>
        </item>
