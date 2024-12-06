@@ -55,7 +55,7 @@ namespace m0st4fa::forms {
 		watcher->setFuture(future); // Set the future for monitoring
 	}
 
-	void GoogleFormsAPI::getResponse(const QString& formId, const QString& responseId)
+	void GoogleFormsAPI::executePrompt(const QString& formId, const QString& responseId)
 	{
 		if (m_accessToken.isEmpty()) {
 			emit errorOccurred("Invalid access token.");

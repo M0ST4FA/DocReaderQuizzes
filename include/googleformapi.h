@@ -30,7 +30,7 @@ namespace m0st4fa::forms {
 
 	public slots:
 		void getForm(const QString&);
-		void getResponse(const QString&, const QString&);
+		void executePrompt(const QString&, const QString&);
 		void getResponses(const QString&);
 
 		void createForm(const QString&, const QString&);

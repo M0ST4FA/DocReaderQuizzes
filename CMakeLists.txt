@@ -57,6 +57,7 @@ target_link_libraries(Quizzes
 target_compile_definitions(Quizzes PRIVATE DEVELOPMENT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(Quizzes PRIVATE CLIENT_ID="${CLIENT_ID}")
 target_compile_definitions(Quizzes PRIVATE CLIENT_SECRET="${CLIENT_SECRET}")
+target_compile_definitions(Quizzes PRIVATE GEMINI_API_KEY="${GEMINI_API_KEY}")
 
 # Create a new assets directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)

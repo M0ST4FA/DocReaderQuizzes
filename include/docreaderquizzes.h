@@ -74,6 +74,8 @@ private:
 	FileParser* m_parser{ new FileParser{} };
 
 	// Helper functions
+	void _process_text_file();
+	void _process_pdf_file();
 	QVector<CreateItemRequest> _parse_file();
 	void _create_form(const QVector<CreateItemRequest>&);
 	void _reset_to_new_quiz_state();

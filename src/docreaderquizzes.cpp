@@ -142,7 +142,7 @@ void DocReaderQuizzes::on_loginBtn_clicked()
 void DocReaderQuizzes::on_chooseFileBtn_clicked()
 {
 
-	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{}, "Text Files (*.txt)");
+	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{"."}, "Text Files (*.txt);; PDF Files (*.pdf)");
 
 #ifdef _DEBUG
 	qDebug() << "Path of chosen file: " << filePath;
@@ -179,6 +179,14 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 
 	// Creating the form
 	this->_create_form(requests);
+}
+
+void DocReaderQuizzes::_process_text_file()
+{
+}
+
+void DocReaderQuizzes::_process_pdf_file()
+{
 }
 
 QVector<DocReaderQuizzes::CreateItemRequest> DocReaderQuizzes::_parse_file()
