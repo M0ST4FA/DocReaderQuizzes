@@ -155,9 +155,26 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="processPdfBtn">
+         <property name="text">
+          <string>Process PDF</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="createQuizBtn">
          <property name="text">
           <string>Create Quiz</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="progressBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
          </property>
         </widget>
        </item>

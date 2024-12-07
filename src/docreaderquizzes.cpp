@@ -2,8 +2,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QClipboard>
+#include "googlegeminiapi.h"
+#include <QProcess>
 
 const QString DocReaderQuizzes::IMAGE_TO_TEXT_PROMPT = R"(Extract the text out of this image. Be conservative. Indicate the correct option by putting * before the letter denoting it. The correct option is colored red. Return the result in code font.)";
+const QString DocReaderQuizzes::PDF_TO_TEXT_PROMPT = R"(Extract the text out of this pdf file. Be conservative. Do not include in the response any text that is not part of the file. Do not include any headers; only questions and options. Extract all questions and options. Indicate the correct option by prepending an * before the letter denoting it. Use Windows-style new lines. The correct option will have a different background or some mark indicating it.)";
 const QString DocReaderQuizzes::FORMAT_TEXT_PROMPT = R"(Format the following text in the following format: questions begin with a numeral followed by dot. Options begin with a letter followed by dot. Return the result in code font.)";
 
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
@@ -153,7 +156,15 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 		return;
 	}
 
-	this->ui->createQuizBtn->setEnabled(true);
+	QFileInfo fileInfo{ filePath };
+
+	this->m_temporaryInfo.suffix = fileInfo.suffix();
+
+	if (this->m_temporaryInfo.suffix == "pdf")
+		this->_set_state(DocReaderQuizzes::PREPARING_PRE_PROCESSING_FILE);
+	else if (this->m_temporaryInfo.suffix == "txt")
+		this->_set_state(DocReaderQuizzes::PREPARING_PARSING_FILE);
+
 	this->m_temporaryInfo.filePath = filePath;
 }
 
@@ -161,6 +172,19 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 {
 	using namespace m0st4fa::forms;
 	using namespace m0st4fa::forms::update_form;
+
+	this->_process_text_file();
+}
+
+void DocReaderQuizzes::on_processPdfBtn_clicked()
+{
+	this->_set_state(State::PRE_PROCESSING_FILE);
+	this->_process_pdf_file();
+}
+
+void DocReaderQuizzes::_process_text_file()
+{
+	this->_set_state(State::PARSING_FILE);
 
 	// Parse the file
 	QVector<CreateItemRequest> requests = this->_parse_file();
@@ -181,12 +205,45 @@ void DocReaderQuizzes::on_createQuizBtn_clicked()
 	this->_create_form(requests);
 }
 
-void DocReaderQuizzes::_process_text_file()
-{
-}
-
 void DocReaderQuizzes::_process_pdf_file()
 {
+	using namespace m0st4fa::gemini;
+
+	this->_set_state(PRE_PROCESSING_FILE);
+
+	GoogleGeminiAPI* gemini = new GoogleGeminiAPI{ this };
+
+	QObject::connect(gemini, &GoogleGeminiAPI::promptExecuted, [this](const m0st4fa::gemini::GenerateContentResponse& response) {
+		qInfo() << std::get<0>(response.candidates.at(0).content.parts.at(0).part);
+
+		QFile file{"temp.txt"};
+
+		if (file.open(QIODevice::WriteOnly)) {
+			file.write(std::get<0>(response.candidates.at(0).content.parts.at(0).part).toLatin1());
+			file.close();
+			qDebug() << "File created successfully!";
+		}
+		else {
+			qDebug() << "Error creating file:";
+			qDebug() << file.errorString();
+		}
+
+		this->m_temporaryInfo.filePath = file.fileName();
+
+		QProcess* proc = new QProcess{ this };
+		proc->start("notepad.exe", { file.fileName() }, QIODeviceBase::ReadWrite | QIODeviceBase::Text);
+
+		connect(proc, &QProcess::finished, [](int exitCode, QProcess::ExitStatus status) {
+
+			qInfo() << "Notepad exited with exit code:" << exitCode << "and exit status:" << status;
+
+			});
+
+		this->_set_state(State::PREPARING_PARSING_FILE);
+
+		});
+
+	gemini->executePrompt(PDF_TO_TEXT_PROMPT, this->m_temporaryInfo.filePath);
 }
 
 QVector<DocReaderQuizzes::CreateItemRequest> DocReaderQuizzes::_parse_file()
@@ -263,6 +320,8 @@ void DocReaderQuizzes::_set_createQuizBtn_state()
 	switch (this->m_state)
 	{
 	case WAITING_FOR_FILE:
+		[[fallthrough]];
+	case PREPARING_PARSING_FILE:
 		this->ui->createQuizBtn->setEnabled(true);
 		this->ui->createQuizBtn->setText("Create Quiz");
 		break;
@@ -282,11 +341,34 @@ void DocReaderQuizzes::_set_createQuizBtn_state()
 
 }
 
+void DocReaderQuizzes::_set_processPdfBtn_state()
+{
+	switch (this->m_state)
+	{
+	case WAITING_FOR_FILE:
+		this->ui->processPdfBtn->setEnabled(false);
+		this->ui->processPdfBtn->setText("Process PDF");
+		break;
+	case PREPARING_PRE_PROCESSING_FILE:
+		this->ui->processPdfBtn->setEnabled(true);
+		break;
+	case PRE_PROCESSING_FILE:
+		this->ui->processPdfBtn->setEnabled(false);
+		this->ui->processPdfBtn->setText("Processing PDF...");
+		break;
+	case CREATING_FORM:
+		this->ui->processPdfBtn->setEnabled(false);
+		break;
+	default:
+		this->ui->processPdfBtn->setEnabled(false);
+		this->ui->processPdfBtn->setText("Unhandled state");
+		break;
+	}
+}
+
 void DocReaderQuizzes::_set_state(State state)
 {
 	this->m_state = state;
-
-	this->_set_createQuizBtn_state();
 
 	switch (this->m_state)
 	{
@@ -298,8 +380,29 @@ void DocReaderQuizzes::_set_state(State state)
 		this->ui->formTitleLineEdit->setText("");
 		this->ui->formDocumentLineEdit->setText("");
 		this->ui->formDescriptionLineEdit->setText("");
+
+		this->ui->chooseFileBtn->show();
+		this->ui->processPdfBtn->hide();
+		this->ui->createQuizBtn->hide();
+		this->ui->progressBar->hide();
+		break;
+	case PREPARING_PRE_PROCESSING_FILE:
+		this->ui->processPdfBtn->show();
+		this->_set_processPdfBtn_state();
+		break;
+	case PRE_PROCESSING_FILE:
+		this->ui->chooseFileBtn->hide();
+		this->ui->processPdfBtn->show();
+		this->_set_processPdfBtn_state();
+		break;
+	case PREPARING_PARSING_FILE:
+		this->ui->processPdfBtn->hide();
+		this->ui->createQuizBtn->show();
+		this->_set_createQuizBtn_state();
 		break;
 	case PARSING_FILE:
+		this->ui->chooseFileBtn->hide();
+		this->ui->createQuizBtn->hide();
 		this->ui->reportingTextEdit->clear();
 		break;
 	case CREATING_FORM:

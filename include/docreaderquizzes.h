@@ -34,11 +34,14 @@ protected slots:
 
 	void on_createQuizBtn_clicked();
 
+	void on_processPdfBtn_clicked();
+
 private:
 
 	// UI
 	std::shared_ptr<Ui::DocReaderQuizzesClass> ui{ new Ui::DocReaderQuizzesClass() };
 	static const QString IMAGE_TO_TEXT_PROMPT;
+	static const QString PDF_TO_TEXT_PROMPT;
 	static const QString FORMAT_TEXT_PROMPT;
 
 	// Authentication
@@ -53,6 +56,7 @@ private:
 	// Session state
 	struct {
 		QString filePath;
+		QString suffix;
 		QString description;
 		QVector<CreateItemRequest> requests;
 		bool updated = false;
@@ -66,6 +70,9 @@ private:
 	} m_temporaryInfo;
 	enum State {
 		WAITING_FOR_FILE,
+		PREPARING_PRE_PROCESSING_FILE,
+		PRE_PROCESSING_FILE,
+		PREPARING_PARSING_FILE,
 		PARSING_FILE,
 		CREATING_FORM,
 	} m_state = WAITING_FOR_FILE;
@@ -81,5 +88,6 @@ private:
 	void _reset_to_new_quiz_state();
 	void _set_copyright_info();
 	void _set_createQuizBtn_state();
+	void _set_processPdfBtn_state();
 	void _set_state(State);
 };
