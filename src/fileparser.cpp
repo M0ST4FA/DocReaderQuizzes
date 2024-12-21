@@ -48,6 +48,7 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 		QString questionTitle = question.value("title").toObject().value("text").toString();
 		QString correctAnswer;
 		QVector<Option> options;
+		bool shuffleOptions = question.value("shuffleOptions").toBool();
 
 		for (const QJsonValue& ans : question.value("options").toArray()) {
 
@@ -77,7 +78,7 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 					ChoiceQuestion {
 						.type = ChoiceQuestion::Type::RADIO,
 						.options = options,
-						.shuffle = true
+						.shuffle = shuffleOptions
 					}
 				}
 			}
@@ -226,12 +227,25 @@ QJsonObject FileParser::_parse_question()
 		return QJsonObject{};
 	}
 
-
-
-	return QJsonObject{
+	QJsonObject json{
 		std::pair<QString, QJsonValue>{"title", title},
-		std::pair<QString, QJsonValue>{"options", options}
+		std::pair<QString, QJsonValue>{"options", options},
+		std::pair<QString, QJsonValue>{"shuffleOptions", true}
 	};
+
+	bool orderSensitive = std::any_of(options.begin(), options.end(), [&json](const QJsonValue& val)->bool {
+
+		QJsonObject obj = val.toObject();
+		QString optionText = obj.value("text").toString();
+
+		return optionText.contains("above");
+
+		});
+
+	if (orderSensitive)
+		json["shuffleOptions"] = false;
+
+	return json;
 }
 
 QJsonObject FileParser::_parse_question_title()
