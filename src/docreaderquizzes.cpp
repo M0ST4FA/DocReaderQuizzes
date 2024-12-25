@@ -15,6 +15,7 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 {
 	ui->setupUi(this);
 	this->m_parser->setParent(this);
+	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
 
 	this->_set_copyright_info();
 
@@ -189,8 +190,11 @@ void DocReaderQuizzes::handle_settings_dialog() const
 {
 
 	int res = this->m_settings->exec();
-	qDebug() << res;
 
+	if (res == 0)
+		return;
+
+	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
 }
 
 void DocReaderQuizzes::_process_text_file()

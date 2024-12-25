@@ -62,13 +62,13 @@ public:
 	using CreateItemRequest = m0st4fa::forms::update_form::CreateItemRequest;
 	using Form = m0st4fa::forms::Form;
 
-	FileParser(const QString& = "", QObject* = nullptr);
+	FileParser(const QString& = "", bool requireAllQuestions = true, bool includeOptionIndicator = true, QObject* = nullptr);
 
 	QVector<FileParser::CreateItemRequest> parseFile();
 
 	void setFilePath(const QString&);
-
 	bool foundError() const;
+	void setSettings(bool requireAllQuestions, bool includeOptionIndicator);
 
 signals:
 
@@ -88,11 +88,16 @@ private:
 	QString m_fileContent;
 	bool m_foundError = false;
 
+	// Settings
+	bool m_requireAllQuestions = true;
+	bool m_includeOptionIndicator = true;
+
 	// Json document intermediate generated from text file
 	QJsonDocument m_document;
 
 	// HELPER FUNCTIONS
 	void _open_and_read_file(const QString&);
+	QVector<FileParser::CreateItemRequest> _questions_to_requests(const QJsonArray&);
 
 	// PARSING FUNCTIONS
 	QJsonDocument _parse_file();

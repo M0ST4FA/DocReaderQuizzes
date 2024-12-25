@@ -99,14 +99,16 @@ void Settings::_store_state()
 		this->m_localeChanged = false;
 	}
 
-	m_settings.setValue("requireAllQuestions", this->ui->requireQuestionsCheckbox->isChecked());
-	m_settings.setValue("includeOptionIndicator", this->ui->indicatorCheckbox->isChecked());
+	m_settings.setValue("requireAllQuestions", this->m_requireAllQuestions);
+	m_settings.setValue("includeOptionIndicator", this->m_includeOptionIndicator);
 
 	m_settings.endGroup();
 }
 
 void Settings::on_SettingsDialog_accepted()
 {
+	this->m_requireAllQuestions = this->ui->requireQuestionsCheckbox->isChecked();
+	this->m_includeOptionIndicator = this->ui->indicatorCheckbox->isChecked();
 	this->_store_state();
 }
  

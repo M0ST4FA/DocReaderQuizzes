@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include <QLocale>
+#include <QSettings>
 #include "ui_settings.h"
 
 class Settings : public QDialog

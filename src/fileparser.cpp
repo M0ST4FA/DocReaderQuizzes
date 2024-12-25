@@ -7,7 +7,9 @@
 #include <QMessageBox>
 
 
-FileParser::FileParser(const QString& path, QObject* parent) : QObject {parent}
+FileParser::FileParser(const QString& path, bool requireAllQuestions, bool includeOptionIndicator, QObject* parent) : QObject {parent},
+	m_requireAllQuestions {requireAllQuestions},
+	m_includeOptionIndicator{ includeOptionIndicator }
 {
 
 	if (!path.isEmpty())
@@ -38,7 +40,58 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 
 	QJsonArray questions = doc.array();
 
+	QVector<FileParser::CreateItemRequest> requests = this->_questions_to_requests(questions);
+
+	return requests;
+}
+
+void FileParser::setFilePath(const QString& path)
+{
+	this->_reset_parser();
+	_open_and_read_file(path);
+}
+
+bool FileParser::foundError() const
+{
+	return this->m_foundError;
+}
+
+void FileParser::setSettings(bool requireAllQuestions, bool includeOptionIndicator)
+{
+	this->m_requireAllQuestions = requireAllQuestions;
+	this->m_includeOptionIndicator = includeOptionIndicator;
+}
+
+void FileParser::_open_and_read_file(const QString& path)
+{
+	this->m_file.setFileName(path);
+
+	bool opened = m_file.open(QIODeviceBase::OpenModeFlag::ReadOnly | QIODeviceBase::OpenModeFlag::Text | QIODeviceBase::OpenModeFlag::ExistingOnly);
+
+	if (!opened) {
+
+		qCritical() << "Couldn't open file.";
+		qCritical() << m_file.errorString();
+
+	}
+
+	this->m_file.waitForReadyRead(-1);
+
+	this->m_fileContent = this->m_file.readAll();
+}
+
+QVector<FileParser::CreateItemRequest> FileParser::_questions_to_requests(const QJsonArray& questions)
+{
+	using CorrectAnswer = m0st4fa::forms::CorrectAnswer;
+	using ChoiceQuestion = m0st4fa::forms::ChoiceQuestion;
+	using Option = m0st4fa::forms::Option;
+	using Question = m0st4fa::forms::Question;
+	using QuestionItem = m0st4fa::forms::QuestionItem;
+	using Item = m0st4fa::forms::Item;
+	using Location = m0st4fa::forms::update_form::Location;
+
 	unsigned int location = 0;
+
 	QVector<FileParser::CreateItemRequest> requests;
 
 	for (const QJsonValue& quest : questions) {
@@ -58,7 +111,13 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 
 			QString indicator = answer.value("indicator").toString().toUpper();
 			QString text = answer.value("text").toString();
-			QString option = indicator + ". " + text;
+
+			QString option;
+
+			if (m_includeOptionIndicator)
+				option = indicator + ". " + text;
+			else
+				option = text;
 
 			if (isCorrect)
 				correctAnswer = option;
@@ -70,7 +129,7 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 
 		QuestionItem questionItem{
 			.question = {
-				.required = true,
+				.required = m_requireAllQuestions,
 				.grading {
 					.pointValue = 1,
 					.correctAnswers = {
@@ -87,7 +146,7 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 			}
 		};
 
-		Item item{.title = questionTitle, .item = questionItem};
+		Item item{ .title = questionTitle, .item = questionItem };
 
 		CreateItemRequest request{ .item = item, .location {.index = location} };
 
@@ -97,35 +156,6 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 	}
 
 	return requests;
-}
-
-void FileParser::setFilePath(const QString& path)
-{
-	this->_reset_parser();
-	_open_and_read_file(path);
-}
-
-bool FileParser::foundError() const
-{
-	return this->m_foundError;
-}
-
-void FileParser::_open_and_read_file(const QString& path)
-{
-	this->m_file.setFileName(path);
-
-	bool opened = m_file.open(QIODeviceBase::OpenModeFlag::ReadOnly | QIODeviceBase::OpenModeFlag::Text | QIODeviceBase::OpenModeFlag::ExistingOnly);
-
-	if (!opened) {
-
-		qCritical() << "Couldn't open file.";
-		qCritical() << m_file.errorString();
-
-	}
-
-	this->m_file.waitForReadyRead(-1);
-
-	this->m_fileContent = this->m_file.readAll();
 }
 
 QJsonDocument FileParser::_parse_file()
