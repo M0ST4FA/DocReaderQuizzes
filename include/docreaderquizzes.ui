@@ -111,8 +111,11 @@
         <layout class="QFormLayout" name="formLayout">
          <item row="0" column="0">
           <widget class="QLabel" name="formTitleLabel">
-           <property name="statusTip">
+           <property name="toolTip">
             <string>The title of form.</string>
+           </property>
+           <property name="statusTip">
+            <string/>
            </property>
            <property name="text">
             <string>Form Title</string>
@@ -121,8 +124,11 @@
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="documentTitleLabel">
-           <property name="statusTip">
+           <property name="toolTip">
             <string>The name of the form in Google Drive. Each form is a file in Google Drive and this file has a name. This field sets this name.</string>
+           </property>
+           <property name="statusTip">
+            <string/>
            </property>
            <property name="text">
             <string>Document Title</string>
@@ -131,8 +137,11 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="formDescriptionLabel">
-           <property name="statusTip">
+           <property name="toolTip">
             <string>The description of the form.</string>
+           </property>
+           <property name="statusTip">
+            <string/>
            </property>
            <property name="text">
             <string>Form Description</string>
@@ -158,8 +167,11 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="statusTip">
+         <property name="toolTip">
           <string>Choose a file to be converted to a Google Form.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
          </property>
          <property name="text">
           <string>Choose File</string>
@@ -168,8 +180,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="processPdfBtn">
-         <property name="statusTip">
+         <property name="toolTip">
           <string>Process the PDF using AI. The outcome is a textual representation of the quiz. This representation is used by the app to create a Google Form.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
          </property>
          <property name="text">
           <string>Process PDF</string>
@@ -178,8 +193,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="createQuizBtn">
-         <property name="statusTip">
+         <property name="toolTip">
           <string>Create a quiz from the chosen file.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
          </property>
          <property name="text">
           <string>Create Quiz</string>

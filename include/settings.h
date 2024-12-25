@@ -35,6 +35,8 @@ private:
 	QSettings m_settings;
 
 	void _load_state();
+	void _load_language();
+	void _set_comboboxes();
 	void _store_state();
 
 };

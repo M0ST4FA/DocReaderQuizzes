@@ -18,8 +18,11 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="languageLabel">
-       <property name="statusTip">
+       <property name="toolTip">
         <string>Change the language of the application.</string>
+       </property>
+       <property name="statusTip">
+        <string/>
        </property>
        <property name="text">
         <string>Language</string>
@@ -54,8 +57,11 @@
    </item>
    <item>
     <widget class="QCheckBox" name="requireQuestionsCheckbox">
-     <property name="statusTip">
+     <property name="toolTip">
       <string>Make all questions required.</string>
+     </property>
+     <property name="statusTip">
+      <string/>
      </property>
      <property name="text">
       <string>Require All Questions</string>
@@ -64,8 +70,11 @@
    </item>
    <item>
     <widget class="QCheckBox" name="indicatorCheckbox">
-     <property name="statusTip">
+     <property name="toolTip">
       <string>Include option indicators (A, B, C, ...etc.) in front of option text.</string>
+     </property>
+     <property name="statusTip">
+      <string/>
      </property>
      <property name="text">
       <string>Include Option Indicator</string>

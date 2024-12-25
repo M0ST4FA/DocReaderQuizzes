@@ -1,12 +1,14 @@
 #include "settings.h"
 #include <QSettings>
+#include <QTranslator>
 
 Settings::Settings(QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SettingsDialog())
 {
-	ui->setupUi(this);
 	this->_load_state();
+	ui->setupUi(this);
+	this->_set_comboboxes();
 }
 
 Settings::~Settings()
@@ -65,26 +67,51 @@ void Settings::_load_state()
 	if (localeString.isEmpty() || localeString == "system") {
 		this->m_locale = QLocale::system();
 		this->m_isSystemLocale = true;
-		this->ui->languageCombobox->setCurrentIndex(0);
 	}
 	else {
 		this->m_locale = QLocale{ localeString };
 		this->m_isSystemLocale = false;
-
-		if (this->m_locale.language() == QLocale::Arabic)
-			this->ui->languageCombobox->setCurrentIndex(1);
-		else
-			this->ui->languageCombobox->setCurrentIndex(2);
-
 	}
 
-	this->m_requireAllQuestions = m_settings.value("requireAllQuestions", this->ui->requireQuestionsCheckbox->isChecked()).toBool();
-	this->m_includeOptionIndicator = m_settings.value("includeOptionIndicator", this->ui->indicatorCheckbox->isChecked()).toBool();
+	this->_load_language();
+
+	this->m_requireAllQuestions = m_settings.value("requireAllQuestions", true).toBool();
+	this->m_includeOptionIndicator = m_settings.value("includeOptionIndicator", true).toBool();
+
+	m_settings.endGroup();
+}
+
+void Settings::_load_language()
+{
+	QTranslator* qtTrans = nullptr;
+	QTranslator* appTrans = nullptr;
+	if (this->m_locale.language() == QLocale::Arabic) {
+
+		qtTrans = new QTranslator{ QApplication::instance() };
+		appTrans = new QTranslator{ QApplication::instance() };
+
+		if (!qtTrans->load(":/i18n/assets/translations/qt_ar.qm"))
+			qDebug() << "Couldn't load Qt translations.";
+		if (!appTrans->load(":/i18n/assets/translations/Quizzes_ar_EG.qm"))
+			qDebug() << "Couldn't load app translations.";
+
+		QApplication::instance()->installTranslator(qtTrans);
+		QApplication::instance()->installTranslator(appTrans);
+	}
+}
+
+void Settings::_set_comboboxes()
+{
+
+	if (this->m_isSystemLocale)
+		this->ui->languageCombobox->setCurrentIndex(0);
+	else if (this->m_locale.language() == QLocale::Arabic)
+		this->ui->languageCombobox->setCurrentIndex(1);
+	else
+		this->ui->languageCombobox->setCurrentIndex(2);
 
 	this->ui->requireQuestionsCheckbox->setChecked(this->m_requireAllQuestions);
 	this->ui->indicatorCheckbox->setChecked(this->m_includeOptionIndicator);
-
-	m_settings.endGroup();
 }
 
 void Settings::_store_state()
@@ -111,4 +138,3 @@ void Settings::on_SettingsDialog_accepted()
 	this->m_includeOptionIndicator = this->ui->indicatorCheckbox->isChecked();
 	this->_store_state();
 }
- 

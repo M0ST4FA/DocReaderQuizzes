@@ -13,9 +13,11 @@ const QString DocReaderQuizzes::FORMAT_TEXT_PROMPT = R"(Format the following tex
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
 {
-	ui->setupUi(this);
 	this->m_parser->setParent(this);
-	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
+	// Load settings first for the language
+	this->_load_settings();
+
+	ui->setupUi(this);
 
 	this->_set_copyright_info();
 
@@ -30,7 +32,7 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	connect(this->m_formsApi, &GoogleFormsAPI::formCreated, this, &DocReaderQuizzes::form_created);
 	connect(this->m_formsApi, &GoogleFormsAPI::formUpdated, this, &DocReaderQuizzes::form_updated);
 	connect(this->m_formsApi, &GoogleFormsAPI::errorOccurred, [this](const QString& errorStr) {
-		qInfo() << errorStr;
+		qCritical() << errorStr;
 		});
 	connect(this->m_parser, &FileParser::reportStatus, [this](StatusReport report) {
 
@@ -59,7 +61,7 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	});
 	connect(this->m_parser, &FileParser::aborted, [this]() {
 
-		QMessageBox::critical(this, "DocReaderQuizzes", "Found errors while parsing the file. The form will not be created. Correct the errors and then try again.");
+		QMessageBox::critical(this, tr("DocReaderQuizzes"), tr("Found errors while parsing the file. The form will not be created. Correct the errors and then try again."));
 
 		});
 
@@ -132,7 +134,7 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 		QString formId = this->m_form->formId;
 		QString formLink = QString{"https://docs.google.com/forms/d/%0"}.arg(formId);
 
-		QMessageBox::information(this, "DocReaderQuizzes", QString{ "Form created successfully.\nLink copied to your clipboard." });
+		QMessageBox::information(this, tr("DocReaderQuizzes"), QString{ tr("Form created successfully.\nLink copied to your clipboard.") });
 
 		QApplication::clipboard()->setText(formLink);
 
@@ -149,7 +151,7 @@ void DocReaderQuizzes::on_loginBtn_clicked()
 void DocReaderQuizzes::on_chooseFileBtn_clicked()
 {
 
-	QString filePath = QFileDialog::getOpenFileName(this, "Choose the file to be converted to Google Forms quiz.", QString{"."}, "Text Files (*.txt);; PDF Files (*.pdf)");
+	QString filePath = QFileDialog::getOpenFileName(this, tr("Choose the file to be converted to Google Forms quiz."), QString{"."}, "PDF Files (*.pdf);; Text Files (*.txt)");
 
 #ifdef _DEBUG
 	qDebug() << "Path of chosen file: " << filePath;
@@ -329,6 +331,11 @@ void DocReaderQuizzes::_set_copyright_info()
 
 }
 
+void DocReaderQuizzes::_load_settings()
+{
+	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
+}
+
 void DocReaderQuizzes::_set_createQuizBtn_state()
 {
 
@@ -338,19 +345,19 @@ void DocReaderQuizzes::_set_createQuizBtn_state()
 		[[fallthrough]];
 	case PREPARING_PARSING_FILE:
 		this->ui->createQuizBtn->setEnabled(true);
-		this->ui->createQuizBtn->setText("Create Quiz");
+		this->ui->createQuizBtn->setText(tr("Create Quiz"));
 		break;
 	case PARSING_FILE:
 		this->ui->createQuizBtn->setEnabled(false);
-		this->ui->createQuizBtn->setText("Parsing File...");
+		this->ui->createQuizBtn->setText(tr("Parsing File..."));
 		break;
 	case CREATING_FORM:
 		this->ui->createQuizBtn->setEnabled(false);
-		this->ui->createQuizBtn->setText("Creating Quiz...");
+		this->ui->createQuizBtn->setText(tr("Creating Quiz..."));
 		break;
 	default:
 		this->ui->createQuizBtn->setEnabled(false);
-		this->ui->createQuizBtn->setText("Unhandled state");
+		this->ui->createQuizBtn->setText(tr("Unhandled state"));
 		break;
 	}
 
@@ -362,21 +369,21 @@ void DocReaderQuizzes::_set_processPdfBtn_state()
 	{
 	case WAITING_FOR_FILE:
 		this->ui->processPdfBtn->setEnabled(false);
-		this->ui->processPdfBtn->setText("Process PDF");
+		this->ui->processPdfBtn->setText(tr("Process PDF"));
 		break;
 	case PREPARING_PRE_PROCESSING_FILE:
 		this->ui->processPdfBtn->setEnabled(true);
 		break;
 	case PRE_PROCESSING_FILE:
 		this->ui->processPdfBtn->setEnabled(false);
-		this->ui->processPdfBtn->setText("Processing PDF...");
+		this->ui->processPdfBtn->setText(tr("Processing PDF..."));
 		break;
 	case CREATING_FORM:
 		this->ui->processPdfBtn->setEnabled(false);
 		break;
 	default:
 		this->ui->processPdfBtn->setEnabled(false);
-		this->ui->processPdfBtn->setText("Unhandled state");
+		this->ui->processPdfBtn->setText(tr("Unhandled state"));
 		break;
 	}
 }

@@ -104,4 +104,5 @@ private:
 	void _set_state(State);
 	void _reset_to_new_quiz_state();
 	void _set_copyright_info();
+	void _load_settings();
 };

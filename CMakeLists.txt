@@ -15,9 +15,11 @@ find_package(Qt${QT_VERSION_MAJOR}
         Network
         NetworkAuth
         Concurrent
+        LinguistTools
 )
 
-qt_standard_project_setup()
+qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES ar_EG)
+set(CMAKE_AUTORCC ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     enable_language("RC")
@@ -55,10 +57,20 @@ target_link_libraries(Quizzes
         Qt::Concurrent
 )
 
+# Compile definitions
 target_compile_definitions(Quizzes PRIVATE DEVELOPMENT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_definitions(Quizzes PRIVATE CLIENT_ID="${CLIENT_ID}")
 target_compile_definitions(Quizzes PRIVATE CLIENT_SECRET="${CLIENT_SECRET}")
 target_compile_definitions(Quizzes PRIVATE GEMINI_API_KEY="${GEMINI_API_KEY}")
+
+# Resources
+qt6_add_resources(Quizzes
+    "i18n"
+    PREFIX "/i18n"
+    FILES
+    "./assets/translations/qt_ar.qm" 
+    "./assets/translations/Quizzes_ar_EG.qm"
+)
 
 # Create a new assets directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
@@ -70,3 +82,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assets/icons/appicon.svg DESTINATION ${CMA
 
 install(TARGETS Quizzes DESTINATION bin)
 install(DIRECTORY ${CMAKE_BINARY_DIR}/assets DESTINATION assets)
+
+qt_add_lupdate(
+    SOURCE_TARGETS Quizzes
+    TS_FILES ${PROJECT_NAME}_ar_EG.ts
+)
