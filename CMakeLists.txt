@@ -42,6 +42,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         PROPERTIES
             WIN32_EXECUTABLE TRUE
     )
+    target_compile_definitions(Quizzes PRIVATE QT_NO_DEBUG_OUTPUT)
 endif()
 
 target_link_libraries(Quizzes

@@ -111,6 +111,9 @@
         <layout class="QFormLayout" name="formLayout">
          <item row="0" column="0">
           <widget class="QLabel" name="formTitleLabel">
+           <property name="statusTip">
+            <string>The title of form.</string>
+           </property>
            <property name="text">
             <string>Form Title</string>
            </property>
@@ -118,6 +121,9 @@
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="documentTitleLabel">
+           <property name="statusTip">
+            <string>The name of the form in Google Drive. Each form is a file in Google Drive and this file has a name. This field sets this name.</string>
+           </property>
            <property name="text">
             <string>Document Title</string>
            </property>
@@ -125,6 +131,9 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="formDescriptionLabel">
+           <property name="statusTip">
+            <string>The description of the form.</string>
+           </property>
            <property name="text">
             <string>Form Description</string>
            </property>
@@ -149,6 +158,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="statusTip">
+          <string>Choose a file to be converted to a Google Form.</string>
+         </property>
          <property name="text">
           <string>Choose File</string>
          </property>
@@ -156,6 +168,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="processPdfBtn">
+         <property name="statusTip">
+          <string>Process the PDF using AI. The outcome is a textual representation of the quiz. This representation is used by the app to create a Google Form.</string>
+         </property>
          <property name="text">
           <string>Process PDF</string>
          </property>
@@ -163,18 +178,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="createQuizBtn">
+         <property name="statusTip">
+          <string>Create a quiz from the chosen file.</string>
+         </property>
          <property name="text">
           <string>Create Quiz</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QProgressBar" name="progressBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -234,56 +242,6 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="palette">
-          <palette>
-           <active>
-            <colorrole role="WindowText">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>82</red>
-               <green>232</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </active>
-           <inactive>
-            <colorrole role="WindowText">
-             <brush brushstyle="SolidPattern">
-              <color alpha="255">
-               <red>82</red>
-               <green>232</green>
-               <blue>255</blue>
-              </color>
-             </brush>
-            </colorrole>
-           </inactive>
-           <disabled/>
-          </palette>
-         </property>
-         <property name="font">
-          <font>
-           <family>Segoe Print</family>
-           <pointsize>7</pointsize>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Programmer, M0sT4fa</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::TextFormat::MarkdownText</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-         <property name="openExternalLinks">
-          <bool>true</bool>
          </property>
         </widget>
        </item>

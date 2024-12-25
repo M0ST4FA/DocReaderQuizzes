@@ -55,13 +55,16 @@ QVector<FileParser::CreateItemRequest> FileParser::parseFile()
 			QJsonObject answer = ans.toObject();
 
 			bool isCorrect = answer.value("isCorrectAnswer").toBool();
+
+			QString indicator = answer.value("indicator").toString().toUpper();
 			QString text = answer.value("text").toString();
+			QString option = indicator + ". " + text;
 
 			if (isCorrect)
-				correctAnswer = text;
+				correctAnswer = option;
 
 			options.append(Option{
-				.value = text
+				.value = option
 				});
 		}
 

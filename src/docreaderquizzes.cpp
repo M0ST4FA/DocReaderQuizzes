@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include "googlegeminiapi.h"
 #include <QProcess>
+#include <QShortcut>
 
 const QString DocReaderQuizzes::IMAGE_TO_TEXT_PROMPT = R"(Extract the text out of this image. Be conservative. Indicate the correct option by putting * before the letter denoting it. The correct option is colored red. Return the result in code font.)";
 const QString DocReaderQuizzes::PDF_TO_TEXT_PROMPT = R"(Extract the text out of this pdf file. Be conservative. Do not include in the response any text that is not part of the file. Do not include any headers; only questions and options. Extract all questions and options. Indicate the correct option by prepending an * before the letter denoting it. Use Windows-style new lines. The correct option will have a red mark on the letter denoting it.)";
@@ -60,6 +61,8 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 		QMessageBox::critical(this, "DocReaderQuizzes", "Found errors while parsing the file. The form will not be created. Correct the errors and then try again.");
 
 		});
+
+	this->_set_shortcuts();
 }
 
 DocReaderQuizzes::~DocReaderQuizzes()
@@ -180,6 +183,14 @@ void DocReaderQuizzes::on_processPdfBtn_clicked()
 {
 	this->_set_state(State::PRE_PROCESSING_FILE);
 	this->_process_pdf_file();
+}
+
+void DocReaderQuizzes::handle_settings_dialog() const
+{
+
+	int res = this->m_settings->exec();
+	qDebug() << res;
+
 }
 
 void DocReaderQuizzes::_process_text_file()
@@ -385,7 +396,6 @@ void DocReaderQuizzes::_set_state(State state)
 		this->ui->processPdfBtn->hide();
 		this->_set_processPdfBtn_state();
 		this->ui->createQuizBtn->hide();
-		this->ui->progressBar->hide();
 		break;
 	case PREPARING_PRE_PROCESSING_FILE:
 		this->ui->processPdfBtn->show();
@@ -411,6 +421,13 @@ void DocReaderQuizzes::_set_state(State state)
 	default:
 		break;
 	}
+
+}
+
+void DocReaderQuizzes::_set_shortcuts()
+{
+	QShortcut* settingsShortcut = new QShortcut{ QKeySequence{tr("Ctrl+S")}, this };
+	connect(settingsShortcut, &QShortcut::activated, this, &DocReaderQuizzes::handle_settings_dialog);
 
 }
 

@@ -5,7 +5,7 @@
 #include "googlesso.h"
 #include "googleformapi.h"
 #include "fileparser.h"
-
+#include "settings.h"
 
 class DocReaderQuizzes : public QWidget
 {
@@ -36,6 +36,9 @@ protected slots:
 
 	void on_processPdfBtn_clicked();
 
+	// Handling dialogs
+	void handle_settings_dialog() const;
+
 private:
 
 	// UI
@@ -46,7 +49,7 @@ private:
 
 	// Authentication
 	bool m_authenticated = false;
-	QString scope{ "https://www.googleapis.com/auth/forms.body https://www.googleapis.com/auth/drive.file" };
+	QString scope{ "https://www.googleapis.com/auth/drive.file" };
 	GoogleSSO* m_sso{ new GoogleSSO{ scope, this } };
 
 	// Forms
@@ -80,14 +83,25 @@ private:
 	// Parsing
 	FileParser* m_parser{ new FileParser{} };
 
+	// Settings
+	Settings* m_settings{ new Settings{this} };
+
 	// Helper functions
+
+	// Processing
 	void _process_text_file();
 	void _process_pdf_file();
 	QVector<CreateItemRequest> _parse_file();
 	void _create_form(const QVector<CreateItemRequest>&);
-	void _reset_to_new_quiz_state();
-	void _set_copyright_info();
+
+
+	// Buttons
 	void _set_createQuizBtn_state();
 	void _set_processPdfBtn_state();
+	void _set_shortcuts();
+
+	// State
 	void _set_state(State);
+	void _reset_to_new_quiz_state();
+	void _set_copyright_info();
 };
