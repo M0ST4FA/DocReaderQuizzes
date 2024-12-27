@@ -56,6 +56,11 @@ bool FileParser::foundError() const
 	return this->m_foundError;
 }
 
+void FileParser::resetErrorState()
+{
+	this->m_foundError = false;
+}
+
 void FileParser::setSettings(bool requireAllQuestions, bool includeOptionIndicator)
 {
 	this->m_requireAllQuestions = requireAllQuestions;

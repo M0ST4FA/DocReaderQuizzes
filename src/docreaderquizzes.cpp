@@ -407,6 +407,7 @@ void DocReaderQuizzes::_set_state(State state)
 		this->ui->processPdfBtn->hide();
 		this->_set_processPdfBtn_state();
 		this->ui->createQuizBtn->hide();
+		this->m_parser->resetErrorState();
 		break;
 	case PREPARING_PRE_PROCESSING_FILE:
 		this->ui->processPdfBtn->show();
@@ -421,6 +422,7 @@ void DocReaderQuizzes::_set_state(State state)
 		this->ui->processPdfBtn->hide();
 		this->ui->createQuizBtn->show();
 		this->_set_createQuizBtn_state();
+		this->m_parser->resetErrorState();
 		break;
 	case PARSING_FILE:
 		this->ui->chooseFileBtn->hide();

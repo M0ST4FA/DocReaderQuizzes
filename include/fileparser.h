@@ -68,6 +68,7 @@ public:
 
 	void setFilePath(const QString&);
 	bool foundError() const;
+	void resetErrorState();
 	void setSettings(bool requireAllQuestions, bool includeOptionIndicator);
 
 signals:
