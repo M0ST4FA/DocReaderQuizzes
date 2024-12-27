@@ -387,13 +387,17 @@ QString FileParser::_parse_question_text()
 
 				break;
 			}
-			else
+			else {
+				text += ' ';
 				continue; // it will already be skipped in the next iteration
+			}
 		}
 
 		text += c;
-		if (c == '\n')
+		if (c == '\n') {
 			this->m_currentPosition.adjustForNewLine();
+			text += ' ';
+		}
 		else
 			this->m_currentPosition.addCharacter();
 	}
@@ -498,6 +502,7 @@ QString FileParser::_parse_option_indicator()
 QString FileParser::_parse_option_text()
 {
 	QString text;
+	int nlCount = 0;
 
 	_clear_white_spaces();
 
@@ -506,14 +511,37 @@ QString FileParser::_parse_option_text()
 		QChar c = this->m_fileContent.at(this->m_index);
 
 		if (c == "\n") {
-			this->m_index++; // skip it
 			this->m_currentPosition.adjustForNewLine();
+			nlCount++;
+			if (_is_option_next() || _is_question_next()) {
+				this->m_index++; // skip it
+
+				if (nlCount == 1)
+					emit reportStatus(StatusReport{
+					.level = ReportLevel::WARNING,
+					.tag = WarningTag::POSSIBLE_OPTION_BEGINNING,
+					.position = this->m_currentPosition,
+					.report = "This could possibly be the beginning of an option or question or the continuation of an option or question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two.",
+					.filePath = m_file.fileName(),
+					.fileContent = m_fileContent,
+					.function = __FUNCTION__
+						});
+
+				break;
+			}
+			else {
+				text += ' ';
+				continue; // it will already be skipped in the next iteration
+			}
+
 			break;
 		}
 
 		text += c;
-		if (c == '\n')
+		if (c == '\n') {
 			this->m_currentPosition.adjustForNewLine();
+			text += ' ';
+		}
 		else
 			this->m_currentPosition.addCharacter();
 
