@@ -41,32 +41,32 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 		});
 	connect(this->m_parser, &FileParser::reportStatus, [this](StatusReport report) {
 
-		QColor defaultColor = this->ui->reportingTextEdit->textColor();
+		QColor defaultColor = this->m_logger->textEdit()->textColor();
 
 		switch (report.level)
 		{
 		case ReportLevel::INFO:
-			this->ui->reportingTextEdit->setTextColor(QColor{135, 206, 235});
+			this->m_logger->textEdit()->setTextColor(QColor{135, 206, 235});
 			break;
 
 		case ReportLevel::WARNING:
-			this->ui->reportingTextEdit->setTextColor(QColor{255, 165, 0});
+			this->m_logger->textEdit()->setTextColor(QColor{255, 165, 0});
 			break;
 
 		case ReportLevel::ERROR:
-			this->ui->reportingTextEdit->setTextColor(QColor{255, 0, 0});
+			this->m_logger->textEdit()->setTextColor(QColor{255, 0, 0});
 			break;
 
 		default:
 			break;
 		}
 
-		this->ui->reportingTextEdit->append(report.toString());
-		this->ui->reportingTextEdit->setTextColor(defaultColor);
+		this->m_logger->textEdit()->append(report.toString());
+		this->m_logger->textEdit()->setTextColor(defaultColor);
 	});
 	connect(this->m_parser, &FileParser::aborted, [this]() {
 
-		QMessageBox::critical(this, tr("DocReaderQuizzes"), tr("Found errors while parsing the file. The form will not be created. Correct the errors and then try again."));
+		QMessageBox::critical(this, QApplication::instance()->applicationName(), tr("Found errors while parsing the file. The form will not be created. Correct the errors and then try again."));
 
 		});
 
@@ -139,7 +139,7 @@ void DocReaderQuizzes::form_updated(const UpdateResponseBody& response)
 		QString formId = this->m_form->formId;
 		QString formLink = QString{"https://docs.google.com/forms/d/%0"}.arg(formId);
 
-		QMessageBox::information(this, tr("DocReaderQuizzes"), QString{ tr("Form created successfully.\nLink copied to your clipboard.") });
+		QMessageBox::information(this, QApplication::instance()->applicationName(), QString{ tr("Form created successfully.\nLink copied to your clipboard.") });
 
 		QApplication::clipboard()->setText(formLink);
 
@@ -202,6 +202,11 @@ void DocReaderQuizzes::handle_settings_dialog() const
 		return;
 
 	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
+}
+
+void DocReaderQuizzes::handle_logging_dialog() const
+{
+	this->m_logger->show();
 }
 
 void DocReaderQuizzes::_process_text_file()
@@ -315,17 +320,17 @@ void DocReaderQuizzes::_reset_to_new_quiz_state()
 {
 	this->_set_state(WAITING_FOR_FILE);
 
-	QColor color = this->ui->reportingTextEdit->textColor();
+	QColor color = this->m_logger->textEdit()->textColor();
 
-	this->ui->reportingTextEdit->setTextColor(QColor(135, 206, 235));
+	this->m_logger->textEdit()->setTextColor(QColor(135, 206, 235));
 
 	QString msg1 = "Prompt for converting image to MCQs\n------------------------------------------\n%0";
 	QString msg2 = "Prompt for formatting ill-formatted MCQs\n----------------------------------------------\n%0";
 
-	this->ui->reportingTextEdit->append(msg1.arg(IMAGE_TO_TEXT_PROMPT));
-	this->ui->reportingTextEdit->append(msg2.arg(FORMAT_TEXT_PROMPT));
+	this->m_logger->textEdit()->append(msg1.arg(IMAGE_TO_TEXT_PROMPT));
+	this->m_logger->textEdit()->append(msg2.arg(FORMAT_TEXT_PROMPT));
 
-	this->ui->reportingTextEdit->setTextColor(color);
+	this->m_logger->textEdit()->setTextColor(color);
 }
 
 void DocReaderQuizzes::_set_copyright_info()
@@ -457,7 +462,7 @@ void DocReaderQuizzes::_set_state(State state)
 	case PARSING_FILE:
 		this->ui->chooseFileBtn->hide();
 		this->ui->createQuizBtn->hide();
-		this->ui->reportingTextEdit->clear();
+		this->m_logger->textEdit()->clear();
 		break;
 	case CREATING_FORM:
 		break;
@@ -472,6 +477,8 @@ void DocReaderQuizzes::_set_shortcuts()
 	QShortcut* settingsShortcut = new QShortcut{ QKeySequence{tr("Ctrl+S")}, this };
 	connect(settingsShortcut, &QShortcut::activated, this, &DocReaderQuizzes::handle_settings_dialog);
 
+	QShortcut* loggerShortcut = new QShortcut{ QKeySequence{tr("Ctrl+L")}, this };
+	connect(loggerShortcut, &QShortcut::activated, this, &DocReaderQuizzes::handle_logging_dialog);
 }
 
 void DocReaderQuizzes::token_granted()

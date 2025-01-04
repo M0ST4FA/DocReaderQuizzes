@@ -6,6 +6,7 @@
 #include "googleformapi.h"
 #include "fileparser.h"
 #include "settings.h"
+#include "logger.h"
 
 class DocReaderQuizzes : public QWidget
 {
@@ -38,6 +39,7 @@ protected slots:
 
 	// Handling dialogs
 	void handle_settings_dialog() const;
+	void handle_logging_dialog() const;
 
 private:
 
@@ -83,8 +85,9 @@ private:
 	// Parsing
 	FileParser* m_parser{ new FileParser{} };
 
-	// Settings
+	// Dialogs
 	Settings* m_settings{ new Settings{this} };
+	Logger* m_logger{ new Logger{this} };
 
 	// Helper functions
 

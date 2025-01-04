@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>534</width>
-    <height>377</height>
+    <height>222</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>DocReaderQuizzes</string>
+   <string>Quizzes</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -201,19 +201,6 @@
          </property>
          <property name="text">
           <string>Create Quiz</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="reportingTextEdit">
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="placeholderText">
-          <string/>
          </property>
         </widget>
        </item>
