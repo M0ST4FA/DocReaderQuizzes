@@ -228,7 +228,7 @@ QJsonObject FileParser::_parse_question()
 		emit reportStatus(StatusReport{
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::ZERO_OPTIONS_SPECIFIED,
-		.position = this->m_currentPosition,
+		.position = this->m_currentQuestionPosition,
 		.report = "This question has no option specified.",
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
@@ -242,8 +242,8 @@ QJsonObject FileParser::_parse_question()
 		emit reportStatus(StatusReport{
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::NO_CORRECT_OPTION,
-		.position = this->m_currentPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies non. Look at the question before the one displayed.",
+		.position = this->m_currentQuestionPosition,
+		.report = "Every question must specify one, and only one correct option. This question specifies none.",
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -256,8 +256,8 @@ QJsonObject FileParser::_parse_question()
 		emit reportStatus(StatusReport{
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::ABUNDANT_CORRECT_OPTIONS,
-		.position = this->m_currentPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies more than one. Look at the question before the one displayed.",
+		.position = this->m_currentQuestionPosition,
+		.report = "Every question must specify one, and only one correct option. This question specifies more than one.",
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -284,8 +284,8 @@ QJsonObject FileParser::_parse_question()
 				emit reportStatus(StatusReport{
 				.level = ReportLevel::ERROR,
 				.tag = ErrorTag::DUPLICATE_OPTIONS,
-				.position = this->m_currentPosition,
-				.report = "Some option occurred more than once. An option cannot be duplicated. Look at the question before the one displayed.",
+				.position = this->m_currentQuestionPosition,
+				.report = "Some option occurred more than once. An option cannot be duplicated.",
 				.filePath = m_file.fileName(),
 				.fileContent = m_fileContent,
 				.function = __FUNCTION__
@@ -317,6 +317,8 @@ QJsonObject FileParser::_parse_question_title()
 	// Question title is a string that:
 	// 1. begins with a number or nothing
 	// 2. continues until a new line character
+
+	this->m_currentQuestionPosition = this->m_currentPosition;
 
 	QString questionIndicator = _parse_question_indicator();
 

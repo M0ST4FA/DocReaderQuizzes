@@ -87,6 +87,7 @@ private:
 	QFile m_file;
 	qsizetype m_index = 0;
 	Position m_currentPosition;
+	Position m_currentQuestionPosition;
 	QString m_fileContent;
 	bool m_foundError = false;
 
