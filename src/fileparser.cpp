@@ -229,7 +229,7 @@ QJsonObject FileParser::_parse_question()
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::ZERO_OPTIONS_SPECIFIED,
 		.position = this->m_currentQuestionPosition,
-		.report = "This question has no option specified.",
+		.report = tr("This question has no option specified."),
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -243,7 +243,7 @@ QJsonObject FileParser::_parse_question()
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::NO_CORRECT_OPTION,
 		.position = this->m_currentQuestionPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies none.",
+		.report = tr("Every question must specify one, and only one correct option. This question specifies none."),
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -257,7 +257,7 @@ QJsonObject FileParser::_parse_question()
 		.level = ReportLevel::ERROR,
 		.tag = ErrorTag::ABUNDANT_CORRECT_OPTIONS,
 		.position = this->m_currentQuestionPosition,
-		.report = "Every question must specify one, and only one correct option. This question specifies more than one.",
+		.report = tr("Every question must specify one, and only one correct option. This question specifies more than one."),
 		.filePath = m_file.fileName(),
 		.fileContent = m_fileContent,
 		.function = __FUNCTION__
@@ -285,7 +285,7 @@ QJsonObject FileParser::_parse_question()
 				.level = ReportLevel::ERROR,
 				.tag = ErrorTag::DUPLICATE_OPTIONS,
 				.position = this->m_currentQuestionPosition,
-				.report = "Some option occurred more than once. An option cannot be duplicated.",
+				.report = tr("Some option occurred more than once. An option cannot be duplicated."),
 				.filePath = m_file.fileName(),
 				.fileContent = m_fileContent,
 				.function = __FUNCTION__
@@ -407,7 +407,7 @@ QString FileParser::_parse_question_text()
 					.level = ReportLevel::WARNING,
 					.tag = WarningTag::POSSIBLE_OPTION_BEGINNING,
 					.position = this->m_currentPosition,
-					.report = "This could possibly be the beginning of an option or the continuation of a question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two.",
+					.report = tr("This could possibly be the beginning of an option or the continuation of a question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two."),
 					.filePath = m_file.fileName(),
 					.fileContent = m_fileContent,
 					.function = __FUNCTION__
@@ -470,7 +470,7 @@ QJsonObject FileParser::_parse_question_option()
 				.level = ReportLevel::ERROR,
 				.tag = ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE,
 				.position = this->m_currentPosition,
-				.report = "The correctness indicator '*' can only be in front of an option indicator. It cannot be in front of a question indicator. You may have put it here incorrectly. Remove it and add in front of the correct option. ",
+				.report = tr("The correctness indicator '*' can only be in front of an option indicator. It cannot be in front of a question indicator. You may have put it here incorrectly. Remove it and add in front of the correct option."),
 				.filePath = m_file.fileName(),
 				.fileContent = m_fileContent,
 				.function = __FUNCTION__
@@ -549,7 +549,7 @@ QString FileParser::_parse_option_text()
 					.level = ReportLevel::WARNING,
 					.tag = WarningTag::POSSIBLE_OPTION_BEGINNING,
 					.position = this->m_currentPosition,
-					.report = "This could possibly be the beginning of an option or question or the continuation of an option or question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two.",
+					.report = tr("This could possibly be the beginning of an option or question or the continuation of an option or question on a new line. If you're having problems and this is the continuation of a question on a new line, consider making the question text in a single line only, instead of two."),
 					.filePath = m_file.fileName(),
 					.fileContent = m_fileContent,
 					.function = __FUNCTION__
@@ -757,7 +757,7 @@ QString StatusReport::toString()
 #endif
 
 	// File and line
-	stream << "File <" << filePath << ">, Line " << this->position.lineNumber << "\n\t";
+	stream << QObject::tr("File <") << filePath << QObject::tr(">, Line ") << this->position.lineNumber << "\n\t";
 
 	// Context
 	int beginning = this->position.index < this->fileContent.size() ? this->position.index : this->position.index - 1;
@@ -794,7 +794,7 @@ QString StatusReport::toString()
 		switch (this->tag) {
 
 		case WarningTag::POSSIBLE_OPTION_BEGINNING:
-			tag = "PossibleOptionBeginningWarning: ";
+			tag = QObject::tr("PossibleOptionBeginningWarning: ");
 			break;
 		default:
 			break;
@@ -804,22 +804,22 @@ QString StatusReport::toString()
 		switch (this->tag) {
 
 		case ErrorTag::INCORRECT_INDICATOR:
-			tag = "IncorrectIndicator: ";
+			tag = QObject::tr("IncorrectIndicator: ");
 			break;
 		case ErrorTag::CORRECTNESS_INDICATOR_IN_WRONG_PLACE:
-			tag = "CorrectnessIndicatorInTheWrongPlace: ";
+			tag = QObject::tr("CorrectnessIndicatorInTheWrongPlace: ");
 			break;
 		case ErrorTag::ZERO_OPTIONS_SPECIFIED:
-			tag = "ZeroOptionsSpecified: ";
+			tag = QObject::tr("ZeroOptionsSpecified: ");
 			break;
 		case ErrorTag::NO_CORRECT_OPTION:
-			tag = "NoCorrectOption: ";
+			tag = QObject::tr("NoCorrectOption: ");
 			break;
 		case ErrorTag::ABUNDANT_CORRECT_OPTIONS:
-			tag = "AbundantCorrectOptions: ";
+			tag = QObject::tr("AbundantCorrectOptions: ");
 			break;
 		case ErrorTag::DUPLICATE_OPTIONS:
-			tag = "DuplicateOptions: ";
+			tag = QObject::tr("DuplicateOptions: ");
 			break;
 		default:
 			break;

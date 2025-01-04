@@ -17,6 +17,10 @@ public:
 
 	QTextEdit* textEdit();
 
+protected slots:
+
+	void on_clearBtn_clicked();
+
 private:
 	Ui::LoggerClass *ui;
 };

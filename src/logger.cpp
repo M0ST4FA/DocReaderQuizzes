@@ -16,3 +16,8 @@ QTextEdit* Logger::textEdit()
 {
 	return this->ui->textEdit;
 }
+
+void Logger::on_clearBtn_clicked()
+{
+	this->ui->textEdit->clear();
+}

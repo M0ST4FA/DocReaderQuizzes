@@ -163,7 +163,7 @@ void DocReaderQuizzes::on_chooseFileBtn_clicked()
 #endif
 	
 	if (filePath.isEmpty()) {
-		QMessageBox::critical(this, "Error while processing chosen file.", "Either you didn't choose a file or the path is incorrect. Try to choose again.");
+		QMessageBox::critical(this, QApplication::instance()->applicationName(), tr("Either you didn't choose a file or the path is incorrect. Try to choose again."));
 		return;
 	}
 
@@ -223,7 +223,7 @@ void DocReaderQuizzes::_process_text_file()
 	}
 
 	if (requests.isEmpty()) {
-		QMessageBox::critical(this, "DocReaderQuizzes", "The provided file is either empty or it doesn't adhere to the correct syntax.");
+		QMessageBox::critical(this, QApplication::instance()->applicationName(), tr("The provided file is either empty or it doesn't adhere to the correct syntax."));
 		this->_set_state(WAITING_FOR_FILE);
 		return;
 	}
