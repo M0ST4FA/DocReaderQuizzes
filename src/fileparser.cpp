@@ -271,12 +271,38 @@ QJsonObject FileParser::_parse_question()
 		std::pair<QString, QJsonValue>{"shuffleOptions", true}
 	};
 
+	for (int i = 0; i < options.size(); i++) {
+
+		QString optionText = options.at(i).toObject().value("text").toString();
+
+		for (int j = i + 1; j < options.size(); j++) {
+
+			QString optionText2 = options.at(j).toObject().value("text").toString();
+
+			if (optionText == optionText2) {
+				this->m_foundError = true;
+				emit reportStatus(StatusReport{
+				.level = ReportLevel::ERROR,
+				.tag = ErrorTag::DUPLICATE_OPTIONS,
+				.position = this->m_currentPosition,
+				.report = "Some option occurred more than once. An option cannot be duplicated. Look at the question before the one displayed.",
+				.filePath = m_file.fileName(),
+				.fileContent = m_fileContent,
+				.function = __FUNCTION__
+					});
+				return QJsonObject{};
+			}
+
+		}
+
+	}
+
 	bool orderSensitive = std::any_of(options.begin(), options.end(), [&json](const QJsonValue& val)->bool {
 
 		QJsonObject obj = val.toObject();
 		QString optionText = obj.value("text").toString();
 
-		return optionText.contains("above");
+		return optionText.contains("all", Qt::CaseInsensitive) || optionText.contains("above") || optionText.contains("and", Qt::CaseInsensitive) || optionText.contains("&", Qt::CaseInsensitive);
 
 		});
 
@@ -789,6 +815,9 @@ QString StatusReport::toString()
 			break;
 		case ErrorTag::ABUNDANT_CORRECT_OPTIONS:
 			tag = "AbundantCorrectOptions: ";
+			break;
+		case ErrorTag::DUPLICATE_OPTIONS:
+			tag = "DuplicateOptions: ";
 			break;
 		default:
 			break;
