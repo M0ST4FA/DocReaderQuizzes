@@ -105,4 +105,5 @@ private:
 	void _reset_to_new_quiz_state();
 	void _set_copyright_info();
 	void _load_settings();
+	bool _is_connected_to_internet();
 };

@@ -19,6 +19,11 @@ DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 
 	ui->setupUi(this);
 
+	if (!_is_connected_to_internet()) {
+		QMessageBox::critical(this, QApplication::instance()->applicationName(), "Your computer is not connected to internet. Make sure it is connected and then try again.");
+		std::abort();
+	}
+
 	this->_set_copyright_info();
 
 	this->m_formsApi->setIncludeFormInResponse(true);
@@ -334,6 +339,31 @@ void DocReaderQuizzes::_set_copyright_info()
 void DocReaderQuizzes::_load_settings()
 {
 	this->m_parser->setSettings(m_settings->requireAllQuestions(), m_settings->includeOptionIndicator());
+}
+
+bool DocReaderQuizzes::_is_connected_to_internet()
+{
+	QUrl host("1.1.1.1"); // put here URL (or IP) of your own website if you have one
+	qDebug() << tr("Checking internet connection: connecting to %1 ...").arg(host.toString());
+
+	QTcpSocket* sock = new QTcpSocket(this);
+	connect(sock, &QTcpSocket::errorOccurred, this, [](QAbstractSocket::SocketError error) {
+		qDebug() << "This error occurred during Internet checking:" << error;
+		});
+
+	sock->connectToHost(host.toString(), 80);
+	bool connected = sock->waitForConnected(3'000);//ms
+
+	if (!connected)
+	{
+		sock->abort();
+		qDebug() << tr("%1 is not reachable. Not connected to the Internet").arg(host.toString());
+		return false;
+	}
+
+	sock->close();
+	qDebug() << tr("Connected to the Internet");
+	return true;
 }
 
 void DocReaderQuizzes::_set_createQuizBtn_state()
