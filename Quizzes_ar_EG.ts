@@ -8,85 +8,85 @@
         <translation type="vanished">DocReaderQuizzes</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="69"/>
+        <location filename="src/docreaderquizzes.cpp" line="68"/>
         <source>Found errors while parsing the file. The form will not be created. Correct the errors and then try again.</source>
         <translation>تم العثور على أخطاء أثناء تحليل الملف. لن يتم إنشاء النموذج. قم بتصحيح الأخطاء ثم حاول مرة أخرى.</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="142"/>
+        <location filename="src/docreaderquizzes.cpp" line="141"/>
         <source>Form created successfully.
 Link copied to your clipboard.</source>
         <translation>تم إنشاء النموذج بنجاح.
 تم نسخ الرابط إلى الحافظة .</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="159"/>
+        <location filename="src/docreaderquizzes.cpp" line="158"/>
         <source>Choose the file to be converted to Google Forms quiz.</source>
         <translation>اختر الملف المراد تحويله إلى Google Form.</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="166"/>
+        <location filename="src/docreaderquizzes.cpp" line="165"/>
         <source>Either you didn&apos;t choose a file or the path is incorrect. Try to choose again.</source>
         <translation>إما أنك لم تختر ملفًا أو مسار الملف الذي اخترته غير صحيح. حاول مرة أخري.</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="226"/>
+        <location filename="src/docreaderquizzes.cpp" line="225"/>
         <source>The provided file is either empty or it doesn&apos;t adhere to the correct syntax.</source>
         <translation>الملف الذي اخترته إما أنه فارغ أو صيغة محتواه لا تتطابق مع الصيغة التي يتوقعها التطبيق.</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="352"/>
+        <location filename="src/docreaderquizzes.cpp" line="351"/>
         <source>Checking internet connection: connecting to %1 ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="365"/>
+        <location filename="src/docreaderquizzes.cpp" line="364"/>
         <source>%1 is not reachable. Not connected to the Internet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="370"/>
+        <location filename="src/docreaderquizzes.cpp" line="369"/>
         <source>Connected to the Internet</source>
-        <translation type="unfinished"></translation>
+        <translation>متصل بشبكة الإنترنت</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="383"/>
+        <location filename="src/docreaderquizzes.cpp" line="382"/>
         <source>Create Quiz</source>
         <translation>إنشاء اختبار</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="387"/>
+        <location filename="src/docreaderquizzes.cpp" line="386"/>
         <source>Parsing File...</source>
         <translation>جار تحليل الملف...</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="391"/>
+        <location filename="src/docreaderquizzes.cpp" line="390"/>
         <source>Creating Quiz...</source>
         <translation>جار إنشاء اختبار...</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="395"/>
-        <location filename="src/docreaderquizzes.cpp" line="421"/>
+        <location filename="src/docreaderquizzes.cpp" line="394"/>
+        <location filename="src/docreaderquizzes.cpp" line="420"/>
         <source>Unhandled state</source>
         <translation>حالة غير معروفة</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="407"/>
+        <location filename="src/docreaderquizzes.cpp" line="406"/>
         <source>Process PDF</source>
         <translation>عالج ملف الPDF</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="414"/>
+        <location filename="src/docreaderquizzes.cpp" line="413"/>
         <source>Processing PDF...</source>
         <translation>جار معالجة ملف الPDF...</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="477"/>
+        <location filename="src/docreaderquizzes.cpp" line="476"/>
         <source>Ctrl+S</source>
         <translation>Ctrl+S</translation>
     </message>
     <message>
-        <location filename="src/docreaderquizzes.cpp" line="480"/>
+        <location filename="src/docreaderquizzes.cpp" line="479"/>
         <source>Ctrl+L</source>
         <translation>Ctrl+L</translation>
     </message>
@@ -278,57 +278,67 @@ Link copied to your clipboard.</source>
         <translation>الإعدادات</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="22"/>
+        <location filename="include/settings.ui" line="28"/>
         <source>Change the language of the application.</source>
         <translation>غير لغة التطبيق.</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="28"/>
+        <location filename="include/settings.ui" line="34"/>
         <source>Language</source>
         <translation>اللغة</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="36"/>
+        <location filename="include/settings.ui" line="42"/>
         <source>System</source>
         <translation>لغة النظام</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="41"/>
+        <location filename="include/settings.ui" line="47"/>
         <source>عربي</source>
         <translation>عربي</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="46"/>
+        <location filename="include/settings.ui" line="52"/>
         <source>English</source>
         <translation>English</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="61"/>
+        <location filename="include/settings.ui" line="67"/>
         <source>Make all questions required.</source>
         <translation>إجعل جميع الأسئلة إجبارية.</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="67"/>
+        <location filename="include/settings.ui" line="73"/>
         <source>Require All Questions</source>
         <translation>إجعل جميع الأسئلة إجبارية</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="74"/>
-        <source>Include option indicators (A, B, C, ...etc.) in front of option text.</source>
-        <translation>ضمن مؤشر الخيار أمام نص الخيار (خيار ولا جزر هاهاهاها 😑.) مؤشر الخيار هو الحرف اللذي يظهر قبله (مثل A, B, C, ...إلخ).</translation>
-    </message>
-    <message>
         <location filename="include/settings.ui" line="80"/>
-        <source>Include Option Indicator</source>
-        <translation>ضمن مؤشر الخيار</translation>
+        <source>Include option indicators (A, B, C, ...etc.) in front of option text.</source>
+        <translation>ضَمِّن مؤشر الخيار أمام نص الخيار (خيار ولا جزر هاهاهاها 😑.) مؤشر الخيار هو الحرف اللذي يظهر قبله (مثل A, B, C, ...إلخ).</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="108"/>
+        <location filename="include/settings.ui" line="86"/>
+        <source>Include Option Indicator</source>
+        <translation>ضَمِّن مؤشر الخيار</translation>
+    </message>
+    <message>
+        <location filename="include/settings.ui" line="93"/>
+        <source>Prompt</source>
+        <translation>رسالة التوجيه</translation>
+    </message>
+    <message>
+        <location filename="include/settings.ui" line="102"/>
+        <source>Reset Prompt to Default</source>
+        <translation>إعادة ضبط رسالة التوجيه إلي الرسالة الأصلية</translation>
+    </message>
+    <message>
+        <location filename="include/settings.ui" line="133"/>
         <source>OK</source>
         <translation>حسنًا</translation>
     </message>
     <message>
-        <location filename="include/settings.ui" line="115"/>
+        <location filename="include/settings.ui" line="140"/>
         <source>Cancel</source>
         <translation>ألغِ</translation>
     </message>

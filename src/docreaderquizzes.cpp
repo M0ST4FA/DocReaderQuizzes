@@ -6,10 +6,6 @@
 #include <QProcess>
 #include <QShortcut>
 
-const QString DocReaderQuizzes::DEFAULT_IMAGE_TO_TEXT_PROMPT = R"(Extract the text out of this image. Be conservative. Indicate the correct option by putting * before the letter denoting it. The correct option is colored red. Return the result in code font.)";
-const QString DocReaderQuizzes::DEFAULT_PDF_TO_TEXT_PROMPT = R"(Extract the text out of this pdf file. Be conservative. Do not include in the response any text that is not part of the file. Do not include any headers; only questions and options. Extract all questions and options. Indicate the correct option by prepending an * before the letter denoting it. Use Windows-style new lines. The correct option will have a red mark on the letter denoting it.)";
-const QString DocReaderQuizzes::FORMAT_TEXT_PROMPT = R"(Format the following text in the following format: questions begin with a numeral followed by dot. Options begin with a letter followed by dot. Return the result in code font.)";
-
 DocReaderQuizzes::DocReaderQuizzes(QWidget *parent)
 	: QWidget(parent)
 {
@@ -270,7 +266,7 @@ void DocReaderQuizzes::_process_pdf_file()
 
 		});
 
-	gemini->executePrompt(this->m_PDFToTextPrompt, this->m_temporaryInfo.filePath);
+	gemini->executePrompt(this->m_settings->PDFToTextPrompt(), this->m_temporaryInfo.filePath);
 }
 
 QVector<DocReaderQuizzes::CreateItemRequest> DocReaderQuizzes::_parse_file()
@@ -319,18 +315,6 @@ void DocReaderQuizzes::_create_form(const QVector<CreateItemRequest>& requests)
 void DocReaderQuizzes::_reset_to_new_quiz_state()
 {
 	this->_set_state(WAITING_FOR_FILE);
-
-	QColor color = this->m_logger->textEdit()->textColor();
-
-	this->m_logger->textEdit()->setTextColor(QColor(135, 206, 235));
-
-	QString msg1 = "Prompt for converting image to MCQs\n------------------------------------------\n%0";
-	QString msg2 = "Prompt for formatting ill-formatted MCQs\n----------------------------------------------\n%0";
-
-	this->m_logger->textEdit()->append(msg1.arg(DEFAULT_IMAGE_TO_TEXT_PROMPT));
-	this->m_logger->textEdit()->append(msg2.arg(FORMAT_TEXT_PROMPT));
-
-	this->m_logger->textEdit()->setTextColor(color);
 }
 
 void DocReaderQuizzes::_set_copyright_info()

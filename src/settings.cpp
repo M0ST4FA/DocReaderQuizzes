@@ -2,6 +2,19 @@
 #include <QSettings>
 #include <QTranslator>
 
+const QString Settings::DEFAULT_PDF_TO_TEXT_PROMPT = R"(Extract all the text from this PDF file, focusing only on quiz questions and their answer options.
+Strictly exclude headers, footers, and any non-question-related text.
+Format each question as:
+#. Question title  
+   a. Option 1  
+   b. Option 2  
+   c. Option 3  
+   d. Option 4
+Identify the correct answer by placing an asterisk (*) before the letter of the correct option as:
+	*d. Paris
+The correct answer is marked with a red indicator in the PDF.
+Ensure no extra characters, spaces, or formatting alterations beyond the original structure.)";
+
 Settings::Settings(QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::SettingsDialog())
@@ -9,6 +22,8 @@ Settings::Settings(QWidget *parent)
 	this->_load_state();
 	ui->setupUi(this);
 	this->_set_comboboxes();
+
+	this->ui->promptTextEdit->setText(this->m_PDFToTextPrompt);
 }
 
 Settings::~Settings()
@@ -29,6 +44,11 @@ bool Settings::requireAllQuestions() const
 bool Settings::includeOptionIndicator() const
 {
 	return this->m_includeOptionIndicator;
+}
+
+QString Settings::PDFToTextPrompt() const
+{
+	return this->m_PDFToTextPrompt;
 }
 
 void Settings::on_languageCombobox_currentIndexChanged(int index)
@@ -58,6 +78,17 @@ void Settings::on_languageCombobox_currentIndexChanged(int index)
 
 }
 
+void Settings::on_promptTextEdit_textChanged()
+{
+	this->m_PDFToTextPrompt = this->ui->promptTextEdit->toPlainText();
+}
+
+void Settings::on_resetPromptBtn_clicked()
+{
+	this->m_PDFToTextPrompt = DEFAULT_PDF_TO_TEXT_PROMPT;
+	this->ui->promptTextEdit->setText(this->m_PDFToTextPrompt);
+}
+
 void Settings::_load_state()
 {
 	m_settings.beginGroup("userPreferences");
@@ -77,6 +108,8 @@ void Settings::_load_state()
 
 	this->m_requireAllQuestions = m_settings.value("requireAllQuestions", true).toBool();
 	this->m_includeOptionIndicator = m_settings.value("includeOptionIndicator", true).toBool();
+
+	this->m_PDFToTextPrompt = m_settings.value("PDFToTextPrompt", DEFAULT_PDF_TO_TEXT_PROMPT).toString();
 
 	m_settings.endGroup();
 }
@@ -128,6 +161,8 @@ void Settings::_store_state()
 
 	m_settings.setValue("requireAllQuestions", this->m_requireAllQuestions);
 	m_settings.setValue("includeOptionIndicator", this->m_includeOptionIndicator);
+
+	m_settings.setValue("PDFToTextPrompt", this->m_PDFToTextPrompt);
 
 	m_settings.endGroup();
 }
