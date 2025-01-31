@@ -302,7 +302,7 @@ QJsonObject FileParser::_parse_question()
 		QJsonObject obj = val.toObject();
 		QString optionText = obj.value("text").toString();
 
-		return optionText.contains("all", Qt::CaseInsensitive) || optionText.contains("above") || optionText.contains("and", Qt::CaseInsensitive) || optionText.contains("&", Qt::CaseInsensitive);
+		return optionText.contains("all", Qt::CaseInsensitive) || optionText.contains("above") || optionText.contains("and", Qt::CaseInsensitive) || optionText.contains("or", Qt::CaseInsensitive) || optionText.contains("&", Qt::CaseInsensitive);
 
 		});
 
