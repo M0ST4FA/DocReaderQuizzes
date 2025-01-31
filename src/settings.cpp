@@ -90,9 +90,9 @@ void Settings::_load_language()
 		qtTrans = new QTranslator{ QApplication::instance() };
 		appTrans = new QTranslator{ QApplication::instance() };
 
-		if (!qtTrans->load(":/i18n/assets/translations/qt_ar.qm"))
+		if (!qtTrans->load(":/i18n/translations/qt_ar.qm"))
 			qDebug() << "Couldn't load Qt translations.";
-		if (!appTrans->load(":/i18n/assets/translations/Quizzes_ar_EG.qm"))
+		if (!appTrans->load(":/i18n/translations/Quizzes_ar_EG.qm"))
 			qDebug() << "Couldn't load app translations.";
 
 		QApplication::instance()->installTranslator(qtTrans);

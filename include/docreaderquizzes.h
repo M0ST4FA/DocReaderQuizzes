@@ -45,8 +45,8 @@ private:
 
 	// UI
 	std::shared_ptr<Ui::DocReaderQuizzesClass> ui{ new Ui::DocReaderQuizzesClass() };
-	static const QString IMAGE_TO_TEXT_PROMPT;
-	static const QString PDF_TO_TEXT_PROMPT;
+	static const QString DEFAULT_IMAGE_TO_TEXT_PROMPT;
+	static const QString DEFAULT_PDF_TO_TEXT_PROMPT;
 	static const QString FORMAT_TEXT_PROMPT;
 
 	// Authentication
@@ -81,6 +81,7 @@ private:
 		PARSING_FILE,
 		CREATING_FORM,
 	} m_state = WAITING_FOR_FILE;
+	QString m_PDFToTextPrompt = DEFAULT_PDF_TO_TEXT_PROMPT;
 
 	// Parsing
 	FileParser* m_parser{ new FileParser{} };

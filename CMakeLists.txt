@@ -29,7 +29,7 @@ endif()
 
 # MAIN APP
 file(GLOB PROJECT_SOURCES "main.cpp" "include/*.h" "include/*.ui" "src/*.cpp")
-# QT_ADD_RESOURCES(PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.qrc")
+qt_add_resources(PROJECT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/assets/resources.qrc")
 
 list(REMOVE_ITEM PROJECT_SOURCES
 "C:/Users/mosta/Desktop/Projects/Programming/Apps/DocReaderQuizzes/src/lexer.cpp")
@@ -62,15 +62,6 @@ target_compile_definitions(Quizzes PRIVATE DEVELOPMENT_PATH="${CMAKE_CURRENT_SOU
 target_compile_definitions(Quizzes PRIVATE CLIENT_ID="${CLIENT_ID}")
 target_compile_definitions(Quizzes PRIVATE CLIENT_SECRET="${CLIENT_SECRET}")
 target_compile_definitions(Quizzes PRIVATE GEMINI_API_KEY="${GEMINI_API_KEY}")
-
-# Resources
-qt6_add_resources(Quizzes
-    "i18n"
-    PREFIX "/i18n"
-    FILES
-    "./assets/translations/qt_ar.qm" 
-    "./assets/translations/Quizzes_ar_EG.qm"
-)
 
 # Create a new assets directory
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)

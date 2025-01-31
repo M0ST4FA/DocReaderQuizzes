@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>icons/appicon.ico</file>
     </qresource>
-    <qresource prefix="/translations">
+    <qresource prefix="/i18n">
         <file>translations/qt_ar.qm</file>
         <file>translations/Quizzes_ar_EG.qm</file>
     </qresource>
